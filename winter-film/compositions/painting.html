@@ -1,0 +1,110 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #b7b0c8; }
+    #paint-cam { position: absolute; inset: 0; transform-origin: 38% 62%; }
+    #paint-canvas { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  </style>
+  <div data-hf-id="hf-kqj3" id="root" data-composition-id="painting" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-ioad" id="paint-cam"><canvas data-hf-id="hf-fump" id="paint-canvas" width="1920" height="1080"></canvas></div>
+  </div>
+  <script>
+    (function () {
+      const W = 1920, H = 1080;
+      function rngFrom(seed) {
+        let a = seed >>> 0;
+        return function () {
+          a |= 0; a = (a + 0x6d2b79f5) | 0;
+          let t = Math.imul(a ^ (a >>> 15), 1 | a);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+      const rnd = rngFrom(20261108);
+      const lerp = (a, b, k) => a + (b - a) * k;
+      const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+      const mix = (c1, c2, k) => [lerp(c1[0], c2[0], k), lerp(c1[1], c2[1], k), lerp(c1[2], c2[2], k)];
+      const rgb = (c, a, j) => `rgba(${Math.round(c[0] + j)},${Math.round(c[1] + j)},${Math.round(c[2] + j * 1.1)},${a})`;
+      const noise = (x, y) => Math.sin(x * 0.0071 + Math.sin(y * 0.013) * 2.1) * 0.5 + Math.sin(y * 0.021 + x * 0.0023) * 0.3 + Math.sin((x + y) * 0.0043) * 0.2;
+
+      const SKY_T = hex('#7f7899'), SKY_B = hex('#d9d3e2'), CLOUD = hex('#b9aac9'), WARM = hex('#cdbfcf');
+      const HILL_A = hex('#77729a'), HILL_B = hex('#9a95b4');
+      const PINE_A = hex('#4c4570'), PINE_B = hex('#6d6593');
+      const SNOW_A = hex('#dcd9e8'), SNOW_S = hex('#b3adca');
+      const hillY = (x) => 600 + 38 * Math.sin(x / 260 + 0.6) + 22 * Math.sin(x / 97 + 1.3) - 30 * Math.sin(x / 700);
+      const fieldY = (x) => 735 + 14 * Math.sin(x / 310) + 8 * Math.sin(x / 83);
+
+      function colorAt(x, y) {
+        const hy = hillY(x), fy = fieldY(x);
+        if (y < hy) {
+          let c = mix(SKY_T, SKY_B, Math.min(1, Math.max(0, y / hy)) ** 0.9);
+          const n = noise(x, y);
+          if (n > 0.25) c = mix(c, CLOUD, (n - 0.25) * 0.8);
+          if (n < -0.45) c = mix(c, WARM, (-0.45 - n) * 0.9);
+          return c;
+        }
+        if (y < fy) return mix(HILL_A, HILL_B, (noise(x * 2, y) + 1) / 2);
+        let c = mix(SNOW_A, SNOW_S, Math.max(0, noise(x * 1.4, y * 2.2)) * 0.9);
+        return c;
+      }
+
+      function brush(ctx, x, y, len, w, ang, col, alpha) {
+        const n = Math.max(3, Math.round(w / 2.2));
+        const cs = Math.cos(ang), sn = Math.sin(ang);
+        const bend = (rnd() - 0.5) * len * 0.25;
+        for (let k = 0; k < n; k++) {
+          const off = (k / (n - 1) - 0.5) * w;
+          const j = (rnd() - 0.5) * 26;
+          const l = len * (0.75 + rnd() * 0.25);
+          const sx = x - cs * l / 2 - sn * off, sy = y - sn * l / 2 + cs * off;
+          const ex = x + cs * l / 2 - sn * off, ey = y + sn * l / 2 + cs * off;
+          const mx = (sx + ex) / 2 - sn * bend, my = (sy + ey) / 2 + cs * bend;
+          ctx.strokeStyle = rgb(col, alpha * (0.55 + rnd() * 0.45), j);
+          ctx.lineWidth = 1.4 + rnd() * 2.6;
+          ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(mx, my, ex, ey); ctx.stroke();
+        }
+      }
+
+      function paint() {
+        const ctx = document.getElementById('paint-canvas').getContext('2d');
+        // underpainting
+        for (let y = 0; y < H; y += 8) for (let x = 0; x < W; x += 16) {
+          ctx.fillStyle = rgb(colorAt(x, y), 1, 0); ctx.fillRect(x, y, 16, 8);
+        }
+        // sky and hills: horizontal strokes, gently tilted
+        for (let i = 0; i < 5200; i++) {
+          const x = rnd() * (W + 120) - 60, y = rnd() * 760;
+          const ang = (rnd() - 0.5) * 0.28 + 0.05 * Math.sin(x / 300);
+          brush(ctx, x, y, 50 + rnd() * 90, 10 + rnd() * 16, ang, colorAt(x, y), 0.8);
+        }
+        // pine forest band: stacked short diagonal strokes forming trees
+        for (let tr = 0; tr < 70; tr++) {
+          const bx = rnd() * W, base = fieldY(bx) + 6, h = 45 + rnd() * 85, half = h * 0.28;
+          const col = mix(PINE_A, PINE_B, rnd() * 0.7);
+          for (let s = 0; s < 34; s++) {
+            const k = rnd(), yy = base - k * h, ww = half * (1 - k) + 4;
+            const xx = bx + (rnd() - 0.5) * ww * 2;
+            brush(ctx, xx, yy, 12 + ww * 0.7, 5 + rnd() * 6, (xx < bx ? -0.45 : 0.45) + (rnd() - 0.5) * 0.3, col, 0.9);
+            if (rnd() < 0.35) brush(ctx, xx, yy - 3, 8 + ww * 0.4, 3, (rnd() - 0.5) * 0.4, SNOW_A, 0.85);
+          }
+        }
+        // snowfield: long horizontal strokes with blue-violet shadows
+        for (let i = 0; i < 2600; i++) {
+          const x = rnd() * (W + 120) - 60, y = 740 + rnd() * 360;
+          const c = rnd() < 0.18 ? SNOW_S : colorAt(x, y);
+          brush(ctx, x, y, 80 + rnd() * 140, 8 + rnd() * 14, (rnd() - 0.5) * 0.12, c, 0.85);
+        }
+        // a few bright impasto highlights in the sky
+        for (let i = 0; i < 260; i++) {
+          const x = rnd() * W, y = rnd() * 520;
+          brush(ctx, x, y, 30 + rnd() * 50, 5 + rnd() * 6, (rnd() - 0.5) * 0.3, mix(colorAt(x, y), [244, 242, 248], 0.55), 0.7);
+        }
+      }
+      paint();
+
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo('#paint-cam', { scale: 1.0, x: 0 }, { scale: 1.06, x: -24, duration: 30, ease: 'power1.inOut' }, 0);
+      window.__timelines['painting'] = tl;
+    })();
+  </script>
+</template>

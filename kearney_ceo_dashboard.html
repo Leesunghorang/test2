@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kearney CEO Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap">
+<style>
+/* Direction: graphite soft-UI (dark neumorphism), one champagne accent, hairline type, engraved instrument details.
+   Layout: slim icon rail + content canvas; Home = instrument-panel hero with a large engraved dial. Single dark world by design. */
+:root{
+  color-scheme:dark;
+  --bg:#1c1f24; --bg-2:#20242a; --sh-d:#121418; --sh-l:#2a2e35; --line:rgba(255,255,255,.06); --line-2:rgba(255,255,255,.035);
+  --ink:#eceef1; --ink-2:#a4aab5; --ink-3:#6c737f;
+  --accent:#e2b866; --accent-dim:rgba(226,184,102,.14);
+  --s1:#7ea6ff; --s2:#e2b866; --ctx:#4b525d; --good:#5fd3a8; --bad:#ff8574;
+  --raise:9px 9px 20px var(--sh-d),-7px -7px 18px var(--sh-l);
+  --raise-sm:5px 5px 11px var(--sh-d),-4px -4px 10px var(--sh-l);
+  --inset:inset 4px 4px 9px var(--sh-d),inset -3px -3px 8px var(--sh-l);
+  --r:24px;
+  --f:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --fn:"Plus Jakarta Sans","Noto Sans KR",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;font-weight:400;line-height:1.65;word-break:keep-all;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(1200px 600px at 85% -10%,rgba(226,184,102,.07),transparent 60%),radial-gradient(900px 600px at -10% 110%,rgba(126,166,255,.05),transparent 60%);background-attachment:fixed}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+button{font:inherit;color:inherit;border:0;background:var(--bg);cursor:pointer}
+button:focus-visible{outline:1.5px solid var(--accent);outline-offset:3px}
+.num{font-family:var(--fn);font-variant-numeric:tabular-nums}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);grid-template-rows:auto 1fr;gap:26px;min-height:100%;
+  padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));padding-block:20px 32px}
+/* ---------- top bar ---------- */
+.top{grid-column:1/-1;display:flex;align-items:center;gap:18px;height:64px;padding:0 10px 0 6px}
+.mark{display:flex;align-items:center;gap:14px}
+.logo{width:40px;height:40px;border-radius:12px;box-shadow:var(--raise-sm);display:grid;place-items:center}
+.logo svg{width:18px;height:18px}
+.word{font-family:var(--fn);font-weight:600;font-size:15px;letter-spacing:.42em;color:var(--ink)}
+.desc{font-size:11.5px;color:var(--ink-3);letter-spacing:.04em;margin-top:-2px}
+.crumb{margin-left:28px;padding-left:22px;border-left:1px solid var(--line);font-size:12.5px;color:var(--ink-3)}
+.crumb b{color:var(--ink);font-weight:500}
+.tools{margin-left:auto;display:flex;gap:14px;align-items:center}
+.asof{font-size:11.5px;color:var(--ink-3);margin-right:6px}
+.ib{width:44px;height:44px;border-radius:50%;box-shadow:var(--raise-sm);display:grid;place-items:center;color:var(--ink-2);transition:color .2s,box-shadow .2s;position:relative}
+.ib svg{width:18px;height:18px}
+.ib:hover{color:var(--accent)}
+.ib:active,.ib.on{box-shadow:var(--inset);color:var(--accent)}
+.ib .lbl{position:absolute;top:50px;font-size:10.5px;color:var(--ink-3);white-space:nowrap;letter-spacing:.06em}
+/* ---------- rail ---------- */
+nav{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:var(--r);box-shadow:var(--raise);align-self:start;position:sticky;top:20px}
+.nlabel{font-family:var(--fn);font-size:10px;letter-spacing:.24em;color:var(--ink-3);text-transform:uppercase;padding:12px 12px 6px}
+.nb{display:flex;align-items:center;gap:13px;text-align:left;padding:11px 12px;border-radius:14px;font-size:13px;color:var(--ink-2);transition:color .2s,box-shadow .2s;position:relative}
+.nb svg{width:17px;height:17px;flex:none;opacity:.8}
+.nb .ix{margin-left:auto;font-family:var(--fn);font-size:10.5px;color:var(--ink-3)}
+.nb:hover{color:var(--ink)}
+.nb.on{box-shadow:var(--inset);color:var(--ink)}
+.nb.on svg{color:var(--accent);opacity:1}
+.nb.on::before{content:"";position:absolute;left:-14px;top:50%;width:3px;height:18px;margin-top:-9px;border-radius:0 3px 3px 0;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.rail-foot{margin-top:14px;padding:14px 12px 4px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);line-height:1.6}
+/* ---------- content ---------- */
+main{min-width:0}
+.page{display:grid;gap:26px;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes rise{from{opacity:.25;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.page{animation:none}}
+.ph{display:grid;gap:8px;padding:6px 4px 2px}
+.eb{font-family:var(--fn);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.ph h2{margin:0;font-weight:300;font-size:clamp(22px,2.5vw,30px);line-height:1.38;letter-spacing:-.01em;text-wrap:balance;max-width:34ch}
+.ph h2 b{font-weight:600}
+.ph p{margin:0;color:var(--ink-2);max-width:70ch}
+.card{border-radius:var(--r);box-shadow:var(--raise);padding:24px 26px;min-width:0;background:linear-gradient(145deg,#1f2228,#1a1d21)}
+.ch{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.ch h3{margin:0;font-size:14px;font-weight:500;color:var(--ink)}
+.ch .sub{font-size:12px;color:var(--ink-3);margin-top:2px}
+.ch .right{margin-left:auto}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+.kpi{border-radius:20px;box-shadow:var(--raise);padding:18px 20px 16px;min-width:0;display:grid;gap:4px;background:linear-gradient(145deg,#1f2228,#1a1d21)}
+.kpi .k{font-size:11.5px;color:var(--ink-3);letter-spacing:.02em}
+.kpi .v{font-family:var(--fn);font-weight:300;font-size:30px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi .v small{font-size:15px;color:var(--ink-2);margin-left:2px}
+.kpi .d{font-size:11.5px;color:var(--ink-2)}
+.up{color:var(--good)!important} .dn{color:var(--bad)!important}
+/* segmented control */
+.chips{display:inline-flex;flex-wrap:wrap;gap:4px;padding:5px;border-radius:14px;box-shadow:var(--inset)}
+.chip{padding:6px 13px;border-radius:10px;font-size:12px;color:var(--ink-3);background:transparent;transition:color .2s,box-shadow .2s,background .2s}
+.chip:hover{color:var(--ink)}
+.chip.on{background:var(--bg-2);box-shadow:var(--raise-sm);color:var(--accent);font-weight:500}
+.so{border-radius:var(--r);box-shadow:var(--inset);padding:20px 24px;display:grid;grid-template-columns:auto 1fr;gap:6px 20px}
+.so .t{font-family:var(--fn);font-size:10.5px;letter-spacing:.24em;color:var(--accent);font-weight:600;padding-top:3px}
+.so ul{margin:0;padding-left:16px;display:grid;gap:6px;color:var(--ink-2)}
+.so li::marker{color:var(--accent)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-2)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:7px;vertical-align:3px}
+.chart{width:100%;overflow-x:auto}
+.chart svg{display:block;width:100%;height:auto;min-width:300px}
+.chart svg text{fill:var(--ink-3);font-family:var(--fn);font-size:11px}
+.chart svg text.ko{font-family:var(--f)}
+.chart svg .lab{fill:var(--ink);font-weight:600}
+.chart svg .grid{stroke:var(--line-2)}
+.chart svg .axis{stroke:var(--line)}
+.hit{fill:transparent}
+.bar-click{cursor:pointer}
+/* table */
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:13px}
+th{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);text-align:left;font-weight:500;padding:0 14px 10px;font-family:var(--fn)}
+td{padding:13px 14px;border-top:1px solid var(--line);color:var(--ink-2)}
+td:first-child{color:var(--ink)}
+.tag{font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px;white-space:nowrap;box-shadow:var(--inset)}
+.tag.ok{color:var(--good)} .tag.no{color:var(--bad)} .tag.es{color:var(--accent)}
+/* ---------- HOME ---------- */
+.home{position:relative;overflow:hidden;border-radius:32px;box-shadow:var(--raise);min-height:calc(100vh - 140px);padding:clamp(28px,4.4vw,60px);
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-rows:1fr auto;gap:36px 40px;
+  background:radial-gradient(700px 500px at 78% 38%,rgba(226,184,102,.08),transparent 65%),linear-gradient(150deg,#21252b,#191b20)}
+.home::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--line-2) 1px,transparent 1px),linear-gradient(90deg,var(--line-2) 1px,transparent 1px);background-size:48px 48px;
+  -webkit-mask-image:radial-gradient(ellipse at 70% 40%,#000 0%,transparent 70%);mask-image:radial-gradient(ellipse at 70% 40%,#000 0%,transparent 70%)}
+.hl{position:relative;display:flex;flex-direction:column;justify-content:center;gap:22px;min-width:0}
+.hl h1{margin:0;font-weight:300;font-size:clamp(28px,3.1vw,44px);line-height:1.22;letter-spacing:-.02em;text-wrap:balance}
+.hl h1 em{font-style:normal;font-weight:600;color:var(--accent)}
+.hl .lede{color:var(--ink-2);font-size:15px;max-width:46ch;margin:0}
+.meta-row{display:flex;gap:26px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-3)}
+.meta-row b{display:block;font-family:var(--fn);font-weight:500;color:var(--ink);font-size:13px}
+.dial{position:relative;display:grid;place-items:center;min-width:0}
+.dial svg{width:100%;max-width:440px;height:auto;overflow:visible}
+.dial text{font-family:var(--fn)}
+.strip{position:relative;grid-column:1/-1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px}
+.ins{border-radius:20px;box-shadow:var(--raise-sm);padding:16px 18px;text-align:left;display:grid;gap:6px;transition:box-shadow .2s,transform .2s;background:linear-gradient(145deg,#22262c,#1b1e23)}
+.ins:hover{transform:translateY(-2px)}
+.ins:active{box-shadow:var(--inset);transform:none}
+.ins .top2{display:flex;justify-content:space-between;align-items:center;font-family:var(--fn);font-size:10.5px;letter-spacing:.18em;color:var(--ink-3)}
+.ins .top2 svg{width:14px;height:14px;color:var(--ink-3);transition:color .2s,transform .2s}
+.ins:hover .top2 svg{color:var(--accent);transform:translateX(3px)}
+.ins .big{font-family:var(--fn);font-weight:300;font-size:26px;letter-spacing:-.02em;line-height:1.1}
+.ins .cap{font-size:12px;color:var(--ink-2);line-height:1.45}
+.spark{height:26px;width:100%}
+/* store picker */
+.stores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sb{padding:10px 12px;border-radius:12px;box-shadow:var(--raise-sm);font-size:12.5px;color:var(--ink-2);text-align:left;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.sb small{font-family:var(--fn);font-size:10px;color:var(--ink-3);letter-spacing:.1em}
+.sb.on{box-shadow:var(--inset);color:var(--accent)}
+.svh{font-family:var(--fn);font-size:10px;letter-spacing:.2em;color:var(--ink-3);margin:16px 0 8px}
+.ev{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.ev li{display:grid;grid-template-columns:70px 1fr;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-2)}
+.ev b{font-family:var(--fn);color:var(--accent);font-weight:500;font-size:12px}
+.mini{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.mini .kpi{box-shadow:var(--inset);background:transparent;padding:14px 16px}
+.mini .kpi .v{font-size:24px}
+/* initiatives */
+.init{display:grid;gap:12px}
+.ini{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:16px 18px;border-radius:16px;box-shadow:var(--raise-sm);text-align:left;transition:box-shadow .2s,opacity .2s}
+.ini .sw{width:42px;height:24px;border-radius:999px;box-shadow:var(--inset);position:relative}
+.ini .sw::after{content:"";position:absolute;top:4px;left:4px;width:16px;height:16px;border-radius:50%;background:var(--ctx);transition:left .2s,background .2s,box-shadow .2s}
+.ini.on .sw::after{left:22px;background:var(--accent);box-shadow:0 0 10px rgba(226,184,102,.6)}
+.ini .nm{font-weight:500;font-size:13.5px;color:var(--ink)}
+.ini .as{font-size:11.5px;color:var(--ink-3)}
+.ini .val{font-family:var(--fn);font-weight:400;font-size:18px;font-variant-numeric:tabular-nums}
+.ini:not(.on){opacity:.5}
+.gauge{display:grid;place-items:center;gap:8px;text-align:center}
+.road{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}
+.road .card{padding:22px 24px}
+.road .when{font-family:var(--fn);font-size:10.5px;letter-spacing:.22em;color:var(--accent)}
+.road h3{margin:4px 0 10px;font-size:15px;font-weight:500}
+.road ul{margin:0;padding:0;list-style:none;display:grid;gap:0;font-size:13px;color:var(--ink-2)}
+.road li{padding:8px 0;border-top:1px solid var(--line)}
+#tip{position:fixed;pointer-events:none;background:rgba(36,40,47,.92);backdrop-filter:blur(8px);border:1px solid var(--line);color:var(--ink);font-size:12px;padding:9px 12px;border-radius:12px;opacity:0;transition:opacity .12s;z-index:30;max-width:260px;line-height:1.55;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+#tip b{color:var(--accent);font-weight:500}
+.foot{color:var(--ink-3);font-size:11px;padding:0 6px;letter-spacing:.02em}
+@media (max-width:1180px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.strip{grid-template-columns:repeat(3,minmax(0,1fr))}.road{grid-template-columns:1fr}}
+@media (max-width:980px){.home{grid-template-columns:1fr}.dial svg{max-width:340px}}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;gap:18px}
+  nav{position:static;flex-direction:row;overflow-x:auto;padding:8px;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
+  .nlabel,.rail-foot,.nb .ix{display:none}
+  .nb{flex:none}.nb.on::before{display:none}
+  .g2{grid-template-columns:1fr}
+  .crumb,.asof,.desc{display:none}
+  .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:520px){.stores{grid-template-columns:repeat(2,minmax(0,1fr))}.so{grid-template-columns:1fr}.word{letter-spacing:.28em}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="mark">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#e2b866" stroke-width="1.6" stroke-linecap="round"><path d="M5 4v16"/><path d="M19 4 8.5 12 19 20"/></svg></div>
+      <div><div class="word">KEARNEY</div><div class="desc">CEO Performance Cockpit</div></div>
+    </div>
+    <div class="crumb">Pizza Franchise · 9 Stores · <b id="crumb">Overview</b></div>
+    <div class="tools">
+      <span class="asof num">Data through Aug 2026</span>
+      <button class="ib" id="btnHome" aria-label="홈"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg></button>
+      <button class="ib" id="btnReset" aria-label="초기화"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg></button>
+    </div>
+  </header>
+
+  <nav id="nav" aria-label="대시보드 메뉴">
+    <div class="nlabel">Overview</div>
+    <button class="nb on" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 12 16.5 8.5" stroke-linecap="round"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>Cockpit</button>
+    <div class="nlabel">Insights</div>
+    <button class="nb" data-go="growth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 9.5 12l3.5 3.5L20 8"/><path d="M15 8h5v5"/></svg>성장 엔진<span class="ix">01</span></button>
+    <button class="nb" data-go="cost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 20V10M10 20V5M15 20v-7M20 20v-4"/></svg>비용·인력<span class="ix">02</span></button>
+    <button class="nb" data-go="channel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3.5" width="10" height="17" rx="2.5"/><path d="M11 17h2"/></svg>고객 확보비<span class="ix">03</span></button>
+    <button class="nb" data-go="stores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 0 0-13 0c0 5.4 6.5 11 6.5 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>매장 포트폴리오<span class="ix">04</span></button>
+    <button class="nb" data-go="data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 20 7.5v5c0 4.3-3.4 7.4-8 8.5-4.6-1.1-8-4.2-8-8.5v-5Z"/><path d="M12 9v4M12 16h.01"/></svg>데이터·리스크<span class="ix">05</span></button>
+    <div class="nlabel">Action</div>
+    <button class="nb" data-go="action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>Value & 실행</button>
+    <div class="rail-foot">2020-01 ~ 2026-08 실적<br>매장·월 720건 · 단위 만원</div>
+  </nav>
+
+  <main id="main">
+    <!-- HOME -->
+    <section class="page" data-page="home">
+      <div class="home">
+        <div class="hl">
+          <div class="eb">Executive Overview · FY2026 YTD</div>
+          <h1>성장은 <em>객단가</em>가 끌고,<br>이익은 <em>인건비</em>가 갉아먹고 있습니다</h1>
+          <p class="lede">5대 과제를 실행하면 연 3.9억원, 영업이익의 약 21%를 더할 수 있습니다.</p>
+          <div class="meta-row">
+            <div><b class="num">109.5억</b>2025 매출</div>
+            <div><b class="num">18.4억</b>2025 영업이익</div>
+            <div><b class="num">+5.9%</b>2026 1~8월 매출</div>
+            <div><b class="num">+13.0%</b>2026 1~8월 이익</div>
+          </div>
+        </div>
+        <div class="dial" id="dial"></div>
+        <div class="strip" id="strip"></div>
+      </div>
+    </section>
+
+    <!-- 1 GROWTH -->
+    <section class="page" data-page="growth" hidden>
+      <div class="ph"><div class="eb">01 · Growth Engine</div><h2>2023년부터 주문은 늘지 않았고, 매출 성장은 <b>객단가 인상</b>에만 기대고 있습니다</h2></div>
+      <div class="g4">
+        <div class="kpi"><div class="k">매출 CAGR 2020→2025</div><div class="v">9.3<small>%</small></div><div class="d">70.1억 → 109.5억</div></div>
+        <div class="kpi"><div class="k">주문 증가율 2023~2025</div><div class="v dn">−1.1<small>%</small></div><div class="d">연평균 · 1~8월 기준</div></div>
+        <div class="kpi"><div class="k">객단가 2020→2025</div><div class="v">+25<small>%</small></div><div class="d">2.40만원 → 3.00만원</div></div>
+        <div class="kpi"><div class="k">메뉴 판매가 변경</div><div class="v">0<small>건</small></div><div class="d">배달비 인하 1건 제외</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><h3>매출 증가율 분해</h3><div class="sub">1~8월 · 전년 대비 %</div></div>
+          <div class="right legend"><span><i style="background:var(--s1)"></i>주문 건수</span><span><i style="background:var(--s2)"></i>객단가</span><span><i style="background:var(--ink)"></i>매출</span></div></div>
+        <div class="chart" id="cGrowth"></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><h3>월별 매출 추이</h3><div class="sub">9개 매장 합계 · 억원</div></div>
+          <div class="right chips" id="chRange"><button class="chip on" data-v="all">전체</button><button class="chip" data-v="2024">2024~</button><button class="chip" data-v="2025">2025~</button><button class="chip" data-v="2026">2026</button></div></div>
+        <div class="chart" id="cRev"></div>
+      </div>
+      <div class="so"><div class="t">SO WHAT</div><ul><li>객단가 증가율은 이미 8.1%에서 4.9%로 꺾였습니다. 물량 회복 메뉴와 시간대 전략(2022년 런치 세트처럼)이 필요합니다.</li><li>POS 품목 데이터로 객단가 상승 원인(가격, 품목 수, 사이즈)을 분해합니다.</li></ul></div>
+    </section>
+
+    <!-- 2 COST -->
+    <section class="page" data-page="cost" hidden>
+      <div class="ph"><div class="eb">02 · Cost & Labor</div><h2>인건비율 <b>+4.5%p</b>가 이익을 가장 크게 끌어내렸고, 일회성 개선이 이를 가렸습니다</h2></div>
+      <div class="g2">
+        <div class="card"><div class="ch"><div><h3>영업이익률 브리지</h3><div class="sub">1~8월 · 2020 → 2026 · %p</div></div></div><div class="chart" id="cBridge"></div></div>
+        <div class="card"><div class="ch"><div><h3>직원 1인당 지표</h3><div class="sub">2020 = 100</div></div>
+          <div class="right legend"><span><i style="background:var(--s2)"></i>1인당 인건비</span><span><i style="background:var(--s1)"></i>1인당 처리 주문</span></div></div>
+          <div class="chart" id="cIdx"></div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><h3>비용 항목별 매출 대비 비율</h3><div class="sub">연도별 · 2026은 1~8월</div></div><div class="right chips" id="chCost"></div></div>
+        <div class="chart" id="cCost"></div>
+      </div>
+      <div class="so"><div class="t">SO WHAT</div><ul><li>주문 예측 기반 근무표로 1인당 주문을 345건 이상 관리해 인건비율을 27.7%로 되돌리면 연 약 1.4억원입니다.</li><li>정규직 전환 지원금은 생산성 조건과 연동하고, 신메뉴 출시는 준비 게이트를 통과해야 진행합니다(2026년 3월 폐기율 5.4%).</li></ul></div>
+    </section>
+
+    <!-- 3 CHANNEL -->
+    <section class="page" data-page="channel" hidden>
+      <div class="ph"><div class="eb">03 · Acquisition Cost</div><h2>쿠폰과 수수료로 <b>매출의 16%</b>를 쓰지만 재방문율은 5년째 그대로입니다</h2></div>
+      <div class="g4">
+        <div class="kpi"><div class="k">쿠폰 / 매출</div><div class="v">9.0<small>%</small></div><div class="d">2026 1~8월</div></div>
+        <div class="kpi"><div class="k">플랫폼 수수료 / 매출</div><div class="v">7.0<small>%</small></div><div class="d">배민 인상 2024-11</div></div>
+        <div class="kpi"><div class="k">외부앱 1건당 수수료</div><div class="v">4,927<small>원</small></div><div class="d dn">2020 대비 +31%</div></div>
+        <div class="kpi"><div class="k">재방문율</div><div class="v">52.1<small>%</small></div><div class="d dn">2023 53.4%에서 하락</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ch"><div><h3>주문당 고객 확보 비용</h3><div class="sub">원</div></div>
+          <div class="right legend"><span><i style="background:var(--s1)"></i>외부앱 수수료</span><span><i style="background:var(--s2)"></i>쿠폰</span></div></div>
+          <div class="chart" id="cFee"></div></div>
+        <div class="card"><div class="ch"><div><h3>채널 비중과 재방문율</h3><div class="sub">%</div></div>
+          <div class="right legend"><span><i style="background:var(--s1)"></i>자사앱</span><span><i style="background:var(--s2)"></i>배달</span><span><i style="background:var(--ink)"></i>재방문율</span></div></div>
+          <div class="chart" id="cMix"></div></div>
+      </div>
+      <div class="so"><div class="t">SO WHAT</div><ul><li>자사앱 배달 전환으로 건당 약 4,100원을 아낍니다. 외부앱 배달 10%를 옮기면 연 약 0.65억원입니다.</li><li>쿠폰은 신규·이탈 위험 고객 중심으로 A/B 테스트합니다. 매출 대비 1%p를 줄이면 연 약 1.1억원입니다.</li></ul></div>
+    </section>
+
+    <!-- 4 STORES -->
+    <section class="page" data-page="stores" hidden>
+      <div class="ph"><div class="eb">04 · Store Portfolio</div><h2>하락 매장 2곳은 모두 <b>SV-02 권역</b>이고, 서면점 리뉴얼은 회복 모델을 보여줍니다</h2></div>
+      <div class="card">
+        <div class="ch"><div><h3>매장 랭킹</h3><div class="sub">1~8월 · 2025 → 2026 · 행을 누르면 상세가 열립니다</div></div>
+          <div class="right chips" id="chMetric"><button class="chip on" data-v="opm">영업이익률</button><button class="chip" data-v="opyoy">이익 YoY</button><button class="chip" data-v="revyoy">매출 YoY</button><button class="chip" data-v="qsc">QSC</button><button class="chip" data-v="claim">클레임</button></div></div>
+        <div class="chart" id="cRank"></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><div><h3>매장 선택</h3><div class="sub">SV 권역별</div></div></div>
+          <div id="storeBtns"></div>
+          <div class="ch" style="margin-top:22px"><div><h3>SV별 위생검사 B등급 월 비율</h3><div class="sub">2020-01 ~ 2026-08</div></div></div>
+          <div class="chart" id="cSV"></div>
+        </div>
+        <div class="card" id="storeDetail"></div>
+      </div>
+      <div class="so"><div class="t">SO WHAT</div><ul><li>충장로점에는 90일 턴어라운드 팀을 보내고, 연동점은 성수기 인력 풀을 미리 확보합니다. 두 매장이 2025년 이익률로 돌아가면 연 약 0.7억원입니다.</li><li>SV 관할을 권역 밀도 기준으로 재조정하고, 서면점 리뉴얼 사례로 다음 후보(홍대)를 고릅니다.</li></ul></div>
+    </section>
+
+    <!-- 5 DATA -->
+    <section class="page" data-page="data" hidden>
+      <div class="ph"><div class="eb">05 · Data & Risk</div><h2>손익의 <b>5%</b>가 설명되지 않고, 보고된 치즈 단가 인상은 원가율에 나타나지 않습니다</h2></div>
+      <div class="g4">
+        <div class="kpi"><div class="k">손익 잔차 / 매출</div><div class="v">5.0<small>%</small></div><div class="d">2025년</div></div>
+        <div class="kpi"><div class="k">잔차 ±5% 초과 매장·월</div><div class="v dn">63<small>%</small></div><div class="d">720건 중</div></div>
+        <div class="kpi"><div class="k">QSC와 이익률 상관</div><div class="v">0.02</div><div class="d">매장 효과 제거 후</div></div>
+        <div class="kpi"><div class="k">2026 1~8월 식자재비율</div><div class="v">30.9<small>%</small></div><div class="d">전년 31.1% · 인상 신호 없음</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><h3>월별 식자재비율</h3><div class="sub">치즈 6% 인상 적용(2026-01) 이후에도 전년과 같은 수준 · 연도를 켜고 끄세요</div></div><div class="right chips" id="chYears"></div></div>
+        <div class="chart" id="cFood"></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><h3>사건로그 검증</h3><div class="sub">추정·미확인 항목을 데이터와 대조</div></div></div>
+        <div class="tbl"><table>
+          <thead><tr><th>사건</th><th>로그</th><th>데이터 대조</th><th>판정</th></tr></thead>
+          <tbody>
+            <tr><td>EV-024 배민 수수료 인상</td><td>확인</td><td>매장 평균 수수료 681 → 790 → 828만원</td><td><span class="tag ok">일치</span></td></tr>
+            <tr><td>EV-026 치즈 단가 6% 인상</td><td>미확인</td><td>식자재비율 30.9%(전년 31.1%)</td><td><span class="tag no">미검출</span></td></tr>
+            <tr><td>EV-005 부산 재확산</td><td>추정</td><td>2020-06 부평·영통도 같은 달 저점</td><td><span class="tag no">근거 약함</span></td></tr>
+            <tr><td>EV-023 서면 클레임 감소</td><td>추정</td><td>2024-09 일시적, 지속 감소는 2026년</td><td><span class="tag es">부분 일치</span></td></tr>
+            <tr><td>EV-027 홍대 경쟁점</td><td>추정</td><td>주문 −7.7%, 쿠폰 +28%, 11월 회복</td><td><span class="tag es">정황 일치</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="so"><div class="t">SO WHAT</div><ul><li>표준 손익 계정에서 쿠폰, 환급, 재고 조정을 분리해 잔차를 매출의 1% 이내로 관리합니다.</li><li>QSC 항목을 재방문·클레임 설명력 기준으로 재설계하고, EV-026은 구매 원장으로 확인합니다.</li></ul></div>
+    </section>
+
+    <!-- ACTION -->
+    <section class="page" data-page="action" hidden>
+      <div class="ph"><div class="eb">Value at Stake</div><h2>과제를 켜고 끄면서 <b>이익 개선 여지</b>를 시뮬레이션하세요</h2><p>2025년 실적 기준 1차 추정이며, 과제 간 중복은 고려하지 않았습니다.</p></div>
+      <div class="g2">
+        <div class="card"><div class="ch"><div><h3>개선 과제</h3><div class="sub">스위치로 포함 여부를 바꿉니다</div></div></div><div class="init" id="inits"></div></div>
+        <div class="card gauge"><div class="chart" id="cGauge" style="max-width:340px"></div><div id="gaugeTxt" style="font-size:12px;color:var(--ink-3);max-width:40ch"></div></div>
+      </div>
+      <div class="road">
+        <div class="card"><div class="when">DAY 0–30</div><h3>바로 실행</h3><ul><li>EV-026 구매 원장 대조</li><li>손익 잔차 계정 분해</li><li>충장로점 턴어라운드 팀 파견</li><li>쿠폰 A/B 테스트 설계</li></ul></div>
+        <div class="card"><div class="when">DAY 31–60</div><h3>파일럿</h3><ul><li>주문 예측 근무표(홍대·강남)</li><li>객단가 분해, 물량 회복 메뉴</li><li>연동점 성수기 인력 풀</li><li>SV 관할 재조정안</li></ul></div>
+        <div class="card"><div class="when">DAY 61–90</div><h3>확산 결정</h3><ul><li>쿠폰·근무표 전 매장 확산 결정</li><li>자사앱 배달 사업성 검토</li><li>QSC 재설계, 신메뉴 게이트</li><li>리뉴얼 후보 선정(홍대)</li></ul></div>
+      </div>
+    </section>
+    <p class="foot">Source · 피자 매장별 실적 데이터.xlsx (실습용 가상 데이터) · 매장·월 중복 제거 후 실적 720건 · 2026-09~10 추정치 제외</p>
+  </main>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const DATA={"stores":{"광주 충장로점":{"2020":{"rev":65090,"op":11540,"opm":17.7,"food":29.53,"labor":23.28,"rent":4.19,"plat":8.49,"roy":5.07,"ad":1.89,"resid":9.82,"qsc":86.4,"claim":11.8,"b":75,"reg":2.2,"pt":4.3,"deliv":55.2,"app":5.7,"revisit":44.9,"orders":28287,"rating":4.03},"2021":{"rev":76419,"op":13748,"opm":18.0,"food":30.66,"labor":25.68,"rent":3.64,"plat":8.15,"roy":5.48,"ad":1.93,"resid":6.48,"qsc":85.9,"claim":15.2,"b":75,"reg":2.4,"pt":4.8,"deliv":50.7,"app":9.0,"revisit":49.8,"orders":32579,"rating":4.02},"2022":{"rev":84934,"op":15716,"opm":18.5,"food":32.79,"labor":27.58,"rent":3.3,"plat":7.28,"roy":5.55,"ad":1.89,"resid":3.1,"qsc":86.6,"claim":18.2,"b":67,"reg":2.5,"pt":5.1,"deliv":43.1,"app":13.6,"revisit":52.1,"orders":36018,"rating":4.06},"2023":{"rev":92874,"op":15579,"opm":16.8,"food":30.76,"labor":29.01,"rent":3.16,"plat":7.05,"roy":5.44,"ad":1.87,"resid":5.92,"qsc":87.8,"claim":17.7,"b":50,"reg":2.5,"pt":5.0,"deliv":41.8,"app":18.2,"revisit":51.0,"orders":36444,"rating":4.09},"2024":{"rev":97085,"op":18288,"opm":18.8,"food":31.45,"labor":27.3,"rent":3.06,"plat":6.98,"roy":5.5,"ad":2.07,"resid":4.79,"qsc":87.1,"claim":17.3,"b":50,"reg":2.8,"pt":5.0,"deliv":42.8,"app":21.9,"revisit":49.8,"orders":36347,"rating":4.03},"2025":{"rev":100498,"op":17725,"opm":17.6,"food":32.55,"labor":29.65,"rent":3.01,"plat":6.93,"roy":5.59,"ad":2.0,"resid":2.64,"qsc":86.0,"claim":16.2,"b":75,"reg":2.5,"pt":4.5,"deliv":42.4,"app":25.2,"revisit":52.7,"orders":36572,"rating":4.08},"2026":{"rev":67866,"op":8991,"opm":13.2,"food":37.11,"labor":32.12,"rent":2.8,"plat":6.45,"roy":5.75,"ad":1.79,"resid":0.73,"qsc":82.2,"claim":15.9,"b":88,"reg":2.2,"pt":2.6,"deliv":39.2,"app":29.4,"revisit":51.3,"orders":25144,"rating":4.22}},"대구 동성로점":{"2020":{"rev":76554,"op":11516,"opm":15.0,"food":30.1,"labor":24.96,"rent":4.99,"plat":8.48,"roy":5.15,"ad":1.99,"resid":9.28,"qsc":87.5,"claim":15.2,"b":50,"reg":3.5,"pt":6.7,"deliv":55.0,"app":5.3,"revisit":46.2,"orders":32545,"rating":4.15},"2021":{"rev":90197,"op":15266,"opm":16.9,"food":31.56,"labor":25.87,"rent":4.34,"plat":8.14,"roy":5.35,"ad":1.84,"resid":5.97,"qsc":87.3,"claim":18.3,"b":58,"reg":3.4,"pt":6.7,"deliv":49.1,"app":9.9,"revisit":54.0,"orders":37734,"rating":4.11},"2022":{"rev":101547,"op":18780,"opm":18.5,"food":30.85,"labor":28.14,"rent":3.96,"plat":6.9,"roy":5.61,"ad":1.94,"resid":4.1,"qsc":88.6,"claim":16.9,"b":42,"reg":3.6,"pt":6.5,"deliv":42.8,"app":13.3,"revisit":53.5,"orders":41595,"rating":4.03},"2023":{"rev":109004,"op":19036,"opm":17.5,"food":30.23,"labor":28.69,"rent":3.69,"plat":7.03,"roy":5.43,"ad":2.05,"resid":5.41,"qsc":89.4,"claim":17.3,"b":33,"reg":3.5,"pt":6.6,"deliv":42.9,"app":17.0,"revisit":53.5,"orders":40558,"rating":4.1},"2024":{"rev":114730,"op":19249,"opm":16.8,"food":30.45,"labor":28.77,"rent":3.62,"plat":7.22,"roy":5.43,"ad":2.06,"resid":5.67,"qsc":86.7,"claim":20.8,"b":75,"reg":3.5,"pt":7.0,"deliv":44.2,"app":22.0,"revisit":53.6,"orders":40741,"rating":4.13},"2025":{"rev":120470,"op":20243,"opm":16.8,"food":29.86,"labor":27.5,"rent":3.54,"plat":6.92,"roy":5.43,"ad":2.01,"resid":7.94,"qsc":88.0,"claim":18.8,"b":42,"reg":3.8,"pt":6.5,"deliv":44.1,"app":25.4,"revisit":53.1,"orders":39915,"rating":4.07},"2026":{"rev":82809,"op":14701,"opm":17.8,"food":31.56,"labor":27.69,"rent":3.55,"plat":6.69,"roy":5.55,"ad":2.23,"resid":4.97,"qsc":88.7,"claim":18.9,"b":38,"reg":4.9,"pt":6.6,"deliv":43.9,"app":34.4,"revisit":50.2,"orders":28128,"rating":4.03}},"대전 둔산점":{"2020":{"rev":68650,"op":11406,"opm":16.6,"food":30.19,"labor":24.61,"rent":4.35,"plat":8.44,"roy":5.14,"ad":1.88,"resid":8.77,"qsc":86.9,"claim":13.7,"b":67,"reg":2.5,"pt":4.8,"deliv":55.4,"app":5.3,"revisit":45.2,"orders":28918,"rating":4.1},"2021":{"rev":81525,"op":15484,"opm":19.0,"food":28.59,"labor":24.58,"rent":3.76,"plat":7.5,"roy":5.26,"ad":1.85,"resid":9.46,"qsc":87.3,"claim":16.9,"b":58,"reg":2.5,"pt":4.5,"deliv":50.1,"app":9.8,"revisit":52.8,"orders":34348,"rating":4.1},"2022":{"rev":91965,"op":17647,"opm":19.2,"food":30.41,"labor":26.68,"rent":3.37,"plat":6.86,"roy":5.31,"ad":1.95,"resid":6.22,"qsc":87.4,"claim":16.7,"b":58,"reg":2.7,"pt":5.0,"deliv":42.7,"app":14.2,"revisit":51.6,"orders":37215,"rating":4.09},"2023":{"rev":98429,"op":18728,"opm":19.0,"food":32.09,"labor":26.35,"rent":3.22,"plat":7.06,"roy":5.47,"ad":1.98,"resid":4.81,"qsc":86.9,"claim":14.2,"b":58,"reg":2.5,"pt":4.6,"deliv":43.8,"app":17.3,"revisit":53.7,"orders":37121,"rating":4.1},"2024":{"rev":103047,"op":19477,"opm":18.9,"food":30.48,"labor":27.25,"rent":3.14,"plat":6.92,"roy":5.44,"ad":2.01,"resid":5.87,"qsc":85.7,"claim":15.2,"b":83,"reg":2.3,"pt":4.4,"deliv":43.0,"app":21.0,"revisit":52.9,"orders":36996,"rating":4.08},"2025":{"rev":107120,"op":18679,"opm":17.4,"food":30.24,"labor":28.98,"rent":3.1,"plat":7.29,"roy":5.44,"ad":1.89,"resid":5.63,"qsc":87.9,"claim":14.0,"b":42,"reg":2.7,"pt":4.4,"deliv":44.1,"app":25.7,"revisit":52.0,"orders":37635,"rating":4.07},"2026":{"rev":77297,"op":13972,"opm":18.1,"food":29.07,"labor":31.02,"rent":2.83,"plat":7.26,"roy":5.54,"ad":1.99,"resid":4.22,"qsc":89.6,"claim":14.2,"b":38,"reg":3.6,"pt":6.1,"deliv":43.6,"app":31.9,"revisit":51.4,"orders":27195,"rating":4.15}},"부산 서면점":{"2020":{"rev":83797,"op":13349,"opm":15.9,"food":30.66,"labor":24.65,"rent":5.38,"plat":8.83,"roy":5.04,"ad":1.98,"resid":7.52,"qsc":89.5,"claim":15.2,"b":33,"reg":3.4,"pt":5.9,"deliv":55.6,"app":5.9,"revisit":44.7,"orders":34957,"rating":4.12},"2021":{"rev":99062,"op":17513,"opm":17.7,"food":29.78,"labor":25.84,"rent":4.72,"plat":7.88,"roy":5.4,"ad":1.99,"resid":6.71,"qsc":88.3,"claim":19.1,"b":50,"reg":3.4,"pt":6.7,"deliv":50.0,"app":8.9,"revisit":53.0,"orders":41129,"rating":4.11},"2022":{"rev":111841,"op":19461,"opm":17.4,"food":29.69,"labor":28.25,"rent":4.28,"plat":6.88,"roy":5.21,"ad":1.82,"resid":6.47,"qsc":88.3,"claim":18.8,"b":58,"reg":3.3,"pt":6.9,"deliv":43.7,"app":13.8,"revisit":54.2,"orders":44360,"rating":4.08},"2023":{"rev":119518,"op":21743,"opm":18.2,"food":32.67,"labor":28.5,"rent":4.04,"plat":6.94,"roy":5.55,"ad":1.92,"resid":2.18,"qsc":88.4,"claim":19.9,"b":50,"reg":3.6,"pt":6.8,"deliv":42.1,"app":16.6,"revisit":53.8,"orders":45655,"rating":4.08},"2024":{"rev":125596,"op":18070,"opm":14.4,"food":31.74,"labor":29.55,"rent":3.89,"plat":7.02,"roy":5.37,"ad":1.91,"resid":6.14,"qsc":88.1,"claim":22.1,"b":58,"reg":3.3,"pt":6.3,"deliv":42.8,"app":21.4,"revisit":54.9,"orders":42411,"rating":4.15},"2025":{"rev":130878,"op":22591,"opm":17.3,"food":30.68,"labor":28.9,"rent":3.84,"plat":6.89,"roy":5.48,"ad":1.94,"resid":5.01,"qsc":90.1,"claim":18.6,"b":17,"reg":3.5,"pt":6.0,"deliv":42.7,"app":26.2,"revisit":53.6,"orders":43803,"rating":4.08},"2026":{"rev":89699,"op":18854,"opm":21.0,"food":29.82,"labor":28.85,"rent":3.68,"plat":6.97,"roy":5.63,"ad":2.02,"resid":2.02,"qsc":92.0,"claim":14.1,"b":12,"reg":3.2,"pt":7.4,"deliv":43.7,"app":34.8,"revisit":49.9,"orders":31040,"rating":3.97}},"서울 강남점":{"2020":{"rev":97777,"op":11712,"opm":12.0,"food":30.1,"labor":25.39,"rent":7.98,"plat":8.47,"roy":5.43,"ad":1.98,"resid":8.68,"qsc":92.0,"claim":15.8,"b":0,"reg":4.3,"pt":9.2,"deliv":53.6,"app":4.7,"revisit":48.0,"orders":38606,"rating":4.22},"2021":{"rev":117201,"op":19309,"opm":16.5,"food":29.96,"labor":26.45,"rent":6.63,"plat":8.01,"roy":5.53,"ad":1.99,"resid":4.97,"qsc":89.9,"claim":19.5,"b":33,"reg":4.5,"pt":9.5,"deliv":50.0,"app":9.8,"revisit":54.8,"orders":46520,"rating":4.21},"2022":{"rev":132671,"op":21137,"opm":15.9,"food":30.35,"labor":26.32,"rent":6.1,"plat":6.79,"roy":5.26,"ad":1.87,"resid":7.37,"qsc":89.9,"claim":27.8,"b":42,"reg":4.3,"pt":9.6,"deliv":43.4,"app":13.8,"revisit":55.9,"orders":49259,"rating":4.23},"2023":{"rev":139511,"op":21983,"opm":15.8,"food":33.05,"labor":27.02,"rent":5.94,"plat":6.97,"roy":5.63,"ad":2.08,"resid":3.55,"qsc":91.3,"claim":24.0,"b":17,"reg":4.5,"pt":8.9,"deliv":42.8,"app":17.4,"revisit":54.7,"orders":50618,"rating":4.17},"2024":{"rev":149565,"op":22532,"opm":15.1,"food":30.96,"labor":28.33,"rent":5.64,"plat":6.99,"roy":5.38,"ad":1.89,"resid":5.75,"qsc":91.4,"claim":21.2,"b":0,"reg":4.5,"pt":9.4,"deliv":42.1,"app":21.6,"revisit":55.6,"orders":48371,"rating":4.27},"2025":{"rev":155300,"op":24971,"opm":16.1,"food":30.17,"labor":28.83,"rent":5.48,"plat":7.11,"roy":5.29,"ad":1.95,"resid":5.08,"qsc":90.4,"claim":20.7,"b":25,"reg":4.8,"pt":9.1,"deliv":43.3,"app":24.6,"revisit":55.2,"orders":49513,"rating":4.24},"2026":{"rev":103744,"op":17043,"opm":16.4,"food":28.89,"labor":28.88,"rent":5.54,"plat":6.89,"roy":5.36,"ad":2.08,"resid":5.94,"qsc":89.9,"claim":20.4,"b":25,"reg":5.1,"pt":8.4,"deliv":43.8,"app":28.8,"revisit":55.8,"orders":33563,"rating":4.23}},"서울 홍대점":{"2020":{"rev":95396,"op":13653,"opm":14.3,"food":30.34,"labor":23.86,"rent":7.59,"plat":8.72,"roy":5.34,"ad":1.95,"resid":7.89,"qsc":89.6,"claim":19.0,"b":42,"reg":4.4,"pt":9.2,"deliv":55.9,"app":5.8,"revisit":47.2,"orders":38535,"rating":4.17},"2021":{"rev":113844,"op":15886,"opm":14.0,"food":29.48,"labor":25.83,"rent":6.49,"plat":7.86,"roy":5.19,"ad":1.96,"resid":9.24,"qsc":90.5,"claim":19.6,"b":42,"reg":4.6,"pt":9.2,"deliv":49.8,"app":10.0,"revisit":55.2,"orders":43844,"rating":4.17},"2022":{"rev":127530,"op":20791,"opm":16.3,"food":31.0,"labor":26.37,"rent":5.85,"plat":6.95,"roy":5.24,"ad":1.84,"resid":6.45,"qsc":91.0,"claim":21.8,"b":25,"reg":4.7,"pt":9.5,"deliv":43.5,"app":14.1,"revisit":54.3,"orders":47378,"rating":4.26},"2023":{"rev":135811,"op":23801,"opm":17.5,"food":31.95,"labor":25.7,"rent":5.67,"plat":6.81,"roy":5.4,"ad":1.94,"resid":5.02,"qsc":91.3,"claim":19.0,"b":17,"reg":4.5,"pt":9.3,"deliv":43.3,"app":17.2,"revisit":55.5,"orders":48597,"rating":4.19},"2024":{"rev":141828,"op":21009,"opm":14.8,"food":31.55,"labor":29.98,"rent":5.55,"plat":7.11,"roy":5.45,"ad":1.96,"resid":3.58,"qsc":91.2,"claim":20.0,"b":25,"reg":4.5,"pt":9.8,"deliv":43.7,"app":22.2,"revisit":54.6,"orders":48949,"rating":4.18},"2025":{"rev":148996,"op":22249,"opm":14.9,"food":30.85,"labor":28.8,"rent":5.27,"plat":7.08,"roy":5.49,"ad":2.01,"resid":5.57,"qsc":90.8,"claim":20.1,"b":17,"reg":4.4,"pt":9.6,"deliv":43.7,"app":25.5,"revisit":54.9,"orders":45647,"rating":4.19},"2026":{"rev":100692,"op":17506,"opm":17.4,"food":30.52,"labor":28.47,"rent":5.4,"plat":7.78,"roy":5.73,"ad":2.34,"resid":2.38,"qsc":90.6,"claim":26.7,"b":25,"reg":4.4,"pt":10.6,"deliv":45.1,"app":29.1,"revisit":53.6,"orders":31383,"rating":4.11}},"수원 영통점":{"2020":{"rev":80499,"op":12924,"opm":16.1,"food":29.66,"labor":25.29,"rent":4.67,"plat":8.4,"roy":5.29,"ad":1.85,"resid":8.78,"qsc":87.9,"claim":12.2,"b":58,"reg":3.4,"pt":6.3,"deliv":53.9,"app":5.5,"revisit":45.1,"orders":33793,"rating":4.16},"2021":{"rev":94193,"op":16162,"opm":17.2,"food":30.07,"labor":27.24,"rent":4.06,"plat":8.24,"roy":5.37,"ad":1.81,"resid":6.06,"qsc":88.5,"claim":16.6,"b":42,"reg":3.4,"pt":6.6,"deliv":50.7,"app":9.5,"revisit":53.4,"orders":39607,"rating":4.06},"2022":{"rev":107578,"op":20335,"opm":18.9,"food":30.65,"labor":26.37,"rent":3.61,"plat":6.97,"roy":5.29,"ad":1.85,"resid":6.36,"qsc":87.6,"claim":17.2,"b":75,"reg":3.7,"pt":6.2,"deliv":43.3,"app":14.0,"revisit":54.1,"orders":40692,"rating":4.17},"2023":{"rev":113617,"op":21328,"opm":18.8,"food":31.12,"labor":28.88,"rent":3.48,"plat":6.99,"roy":5.66,"ad":2.18,"resid":2.92,"qsc":88.0,"claim":19.9,"b":50,"reg":3.6,"pt":6.7,"deliv":41.5,"app":17.2,"revisit":54.5,"orders":43601,"rating":4.02},"2024":{"rev":121002,"op":20133,"opm":16.6,"food":32.31,"labor":29.78,"rent":3.3,"plat":7.16,"roy":5.5,"ad":2.0,"resid":3.31,"qsc":87.3,"claim":22.8,"b":50,"reg":3.7,"pt":6.0,"deliv":43.3,"app":21.1,"revisit":52.7,"orders":43089,"rating":4.08},"2025":{"rev":123668,"op":20883,"opm":16.9,"food":30.9,"labor":29.12,"rent":3.27,"plat":7.0,"roy":5.5,"ad":1.99,"resid":5.34,"qsc":87.8,"claim":18.6,"b":50,"reg":3.7,"pt":5.9,"deliv":42.3,"app":25.3,"revisit":53.6,"orders":40610,"rating":4.14},"2026":{"rev":81615,"op":14062,"opm":17.2,"food":30.51,"labor":27.52,"rent":3.35,"plat":6.86,"roy":5.33,"ad":1.88,"resid":7.32,"qsc":88.3,"claim":19.4,"b":50,"reg":3.6,"pt":9.3,"deliv":42.6,"app":33.7,"revisit":49.2,"orders":26684,"rating":4.21}},"인천 부평점":{"2020":{"rev":71920,"op":10670,"opm":14.8,"food":30.62,"labor":24.45,"rent":4.81,"plat":8.66,"roy":5.22,"ad":1.94,"resid":9.47,"qsc":87.5,"claim":13.3,"b":58,"reg":3.6,"pt":6.2,"deliv":55.6,"app":6.0,"revisit":45.2,"orders":29812,"rating":4.1},"2021":{"rev":85489,"op":14830,"opm":17.3,"food":30.91,"labor":26.11,"rent":4.18,"plat":8.16,"roy":5.33,"ad":1.79,"resid":6.17,"qsc":87.9,"claim":16.3,"b":50,"reg":3.5,"pt":6.2,"deliv":50.2,"app":9.5,"revisit":52.4,"orders":35946,"rating":4.13},"2022":{"rev":95554,"op":19116,"opm":20.0,"food":31.15,"labor":26.69,"rent":3.8,"plat":7.16,"roy":5.4,"ad":2.01,"resid":3.78,"qsc":86.0,"claim":17.8,"b":75,"reg":3.5,"pt":6.2,"deliv":43.3,"app":13.0,"revisit":51.2,"orders":38437,"rating":4.08},"2023":{"rev":103529,"op":18991,"opm":18.3,"food":31.79,"labor":28.13,"rent":3.56,"plat":7.03,"roy":5.56,"ad":2.07,"resid":3.52,"qsc":87.2,"claim":19.1,"b":58,"reg":3.7,"pt":6.2,"deliv":43.1,"app":17.8,"revisit":52.6,"orders":38765,"rating":4.09},"2024":{"rev":108730,"op":19280,"opm":17.7,"food":32.05,"labor":29.23,"rent":3.49,"plat":7.08,"roy":5.56,"ad":1.96,"resid":2.89,"qsc":87.5,"claim":18.5,"b":58,"reg":3.7,"pt":6.6,"deliv":42.8,"app":21.6,"revisit":52.8,"orders":39401,"rating":4.08},"2025":{"rev":113172,"op":20206,"opm":17.9,"food":31.2,"labor":28.47,"rent":3.38,"plat":6.82,"roy":5.39,"ad":1.98,"resid":4.91,"qsc":87.7,"claim":16.8,"b":67,"reg":3.5,"pt":6.4,"deliv":41.7,"app":25.5,"revisit":51.9,"orders":38012,"rating":4.04},"2026":{"rev":77596,"op":15908,"opm":20.5,"food":30.2,"labor":27.9,"rent":3.34,"plat":6.9,"roy":5.31,"ad":2.01,"resid":3.84,"qsc":89.0,"claim":18.2,"b":62,"reg":3.4,"pt":5.4,"deliv":43.4,"app":28.3,"revisit":56.8,"orders":25388,"rating":4.02}},"제주 연동점":{"2020":{"rev":61281,"op":10872,"opm":17.7,"food":29.38,"labor":23.57,"rent":4.08,"plat":8.47,"roy":5.29,"ad":1.82,"resid":9.65,"qsc":85.0,"claim":10.2,"b":92,"reg":2.3,"pt":4.5,"deliv":55.8,"app":5.9,"revisit":43.2,"orders":27033,"rating":4.02},"2021":{"rev":72158,"op":12145,"opm":16.8,"food":31.55,"labor":26.79,"rent":3.53,"plat":7.77,"roy":5.46,"ad":1.89,"resid":6.18,"qsc":85.7,"claim":12.8,"b":75,"reg":2.8,"pt":4.2,"deliv":49.8,"app":8.8,"revisit":49.2,"orders":31381,"rating":4.03},"2022":{"rev":81111,"op":15108,"opm":18.6,"food":31.26,"labor":28.27,"rent":3.24,"plat":6.58,"roy":5.36,"ad":1.93,"resid":4.73,"qsc":86.8,"claim":14.8,"b":75,"reg":2.5,"pt":5.2,"deliv":41.1,"app":14.1,"revisit":51.7,"orders":34929,"rating":3.95},"2023":{"rev":86421,"op":16318,"opm":18.9,"food":32.35,"labor":27.5,"rent":3.07,"plat":7.13,"roy":5.62,"ad":1.99,"resid":3.46,"qsc":85.3,"claim":13.8,"b":75,"reg":2.2,"pt":4.2,"deliv":43.1,"app":17.2,"revisit":51.6,"orders":35311,"rating":4.09},"2024":{"rev":91437,"op":17192,"opm":18.8,"food":30.27,"labor":27.07,"rent":2.97,"plat":6.96,"roy":5.2,"ad":2.01,"resid":6.72,"qsc":86.5,"claim":15.8,"b":67,"reg":2.6,"pt":4.3,"deliv":43.2,"app":21.3,"revisit":51.3,"orders":33531,"rating":4.06},"2025":{"rev":94725,"op":16408,"opm":17.3,"food":32.54,"labor":29.58,"rent":2.92,"plat":7.24,"roy":5.62,"ad":2.13,"resid":2.64,"qsc":86.2,"claim":15.3,"b":75,"reg":2.3,"pt":4.8,"deliv":43.6,"app":24.7,"revisit":51.6,"orders":33815,"rating":4.07},"2026":{"rev":66133,"op":9374,"opm":14.2,"food":32.69,"labor":29.03,"rent":2.88,"plat":6.92,"roy":5.23,"ad":2.15,"resid":6.92,"qsc":88.4,"claim":13.3,"b":62,"reg":3.0,"pt":4.9,"deliv":42.9,"app":31.0,"revisit":51.1,"orders":21300,"rating":4.09}}},"storesYTD":{"광주 충장로점":{"2020":{"rev":40298,"op":6721,"opm":16.7,"food":28.44,"labor":23.69,"rent":4.51,"plat":8.68,"roy":5.12,"ad":1.78,"resid":11.1,"qsc":86.3,"claim":11.8,"b":75,"reg":2.4,"pt":4.0,"deliv":57.4,"app":5.7,"revisit":45.3,"orders":18325,"rating":4.0},"2021":{"rev":48395,"op":7715,"opm":15.9,"food":31.4,"labor":26.8,"rent":3.82,"plat":8.36,"roy":5.59,"ad":1.96,"resid":6.14,"qsc":86.1,"claim":14.0,"b":75,"reg":2.4,"pt":4.5,"deliv":51.8,"app":8.4,"revisit":50.6,"orders":21889,"rating":4.04},"2022":{"rev":54272,"op":10160,"opm":18.7,"food":33.63,"labor":27.21,"rent":3.48,"plat":7.14,"roy":5.65,"ad":1.99,"resid":2.18,"qsc":86.0,"claim":19.1,"b":75,"reg":2.6,"pt":5.4,"deliv":42.8,"app":13.5,"revisit":52.4,"orders":24332,"rating":4.01},"2023":{"rev":60484,"op":10392,"opm":17.2,"food":29.66,"labor":28.01,"rent":3.23,"plat":6.78,"roy":5.29,"ad":1.79,"resid":8.06,"qsc":87.4,"claim":15.6,"b":62,"reg":2.4,"pt":5.0,"deliv":41.5,"app":18.3,"revisit":52.0,"orders":24422,"rating":4.06},"2024":{"rev":62190,"op":11209,"opm":18.0,"food":30.92,"labor":28.11,"rent":3.18,"plat":7.09,"roy":5.62,"ad":2.08,"resid":4.98,"qsc":88.2,"claim":17.8,"b":38,"reg":2.8,"pt":5.1,"deliv":43.6,"app":21.9,"revisit":50.4,"orders":24141,"rating":4.04},"2025":{"rev":64879,"op":10055,"opm":15.5,"food":33.73,"labor":29.78,"rent":3.08,"plat":6.66,"roy":5.56,"ad":1.86,"resid":3.82,"qsc":85.4,"claim":16.2,"b":88,"reg":2.2,"pt":4.4,"deliv":41.0,"app":25.7,"revisit":52.8,"orders":24350,"rating":4.11},"2026":{"rev":67866,"op":8991,"opm":13.2,"food":37.11,"labor":32.12,"rent":2.8,"plat":6.45,"roy":5.75,"ad":1.79,"resid":0.73,"qsc":82.2,"claim":15.9,"b":88,"reg":2.2,"pt":2.6,"deliv":39.2,"app":29.4,"revisit":51.3,"orders":25144,"rating":4.22}},"대구 동성로점":{"2020":{"rev":47322,"op":7326,"opm":15.5,"food":29.37,"labor":23.19,"rent":5.41,"plat":8.59,"roy":5.1,"ad":1.9,"resid":10.96,"qsc":88.3,"claim":14.6,"b":38,"reg":3.2,"pt":6.6,"deliv":56.6,"app":5.4,"revisit":46.3,"orders":20223,"rating":4.15},"2021":{"rev":57585,"op":9374,"opm":16.3,"food":31.24,"labor":25.44,"rent":4.53,"plat":7.85,"roy":5.28,"ad":1.71,"resid":7.67,"qsc":86.8,"claim":18.2,"b":62,"reg":3.5,"pt":6.4,"deliv":48.5,"app":10.0,"revisit":54.5,"orders":24717,"rating":4.08},"2022":{"rev":64600,"op":11956,"opm":18.5,"food":30.68,"labor":29.02,"rent":4.1,"plat":6.93,"roy":5.63,"ad":2.12,"resid":3.01,"qsc":87.5,"claim":18.2,"b":62,"reg":3.8,"pt":6.6,"deliv":42.8,"app":13.6,"revisit":53.0,"orders":28041,"rating":4.01},"2023":{"rev":69484,"op":12137,"opm":17.5,"food":29.78,"labor":28.06,"rent":3.89,"plat":6.96,"roy":5.3,"ad":2.05,"resid":6.49,"qsc":88.8,"claim":18.0,"b":50,"reg":3.5,"pt":6.6,"deliv":42.4,"app":17.1,"revisit":53.6,"orders":26588,"rating":4.08},"2024":{"rev":73787,"op":13244,"opm":17.9,"food":29.83,"labor":27.92,"rent":3.76,"plat":7.1,"roy":5.33,"ad":2.08,"resid":6.02,"qsc":86.1,"claim":20.9,"b":88,"reg":3.4,"pt":7.1,"deliv":43.9,"app":21.8,"revisit":52.6,"orders":26566,"rating":4.15},"2025":{"rev":77544,"op":12032,"opm":15.5,"food":31.34,"labor":28.19,"rent":3.68,"plat":6.92,"roy":5.44,"ad":2.09,"resid":6.84,"qsc":87.9,"claim":19.4,"b":38,"reg":3.8,"pt":6.8,"deliv":44.2,"app":25.7,"revisit":52.8,"orders":26872,"rating":4.06},"2026":{"rev":82809,"op":14701,"opm":17.8,"food":31.56,"labor":27.69,"rent":3.55,"plat":6.69,"roy":5.55,"ad":2.23,"resid":4.97,"qsc":88.7,"claim":18.9,"b":38,"reg":4.9,"pt":6.6,"deliv":43.9,"app":34.4,"revisit":50.2,"orders":28128,"rating":4.03}},"대전 둔산점":{"2020":{"rev":42507,"op":6286,"opm":14.8,"food":31.91,"labor":24.18,"rent":4.67,"plat":8.85,"roy":5.11,"ad":1.88,"resid":8.62,"qsc":87.4,"claim":12.2,"b":75,"reg":2.4,"pt":4.5,"deliv":58.2,"app":5.5,"revisit":45.9,"orders":18359,"rating":4.05},"2021":{"rev":52130,"op":9720,"opm":18.6,"food":27.77,"labor":23.65,"rent":3.93,"plat":7.26,"roy":5.15,"ad":1.79,"resid":11.8,"qsc":88.6,"claim":16.2,"b":50,"reg":2.4,"pt":4.2,"deliv":49.5,"app":9.3,"revisit":52.6,"orders":22063,"rating":4.14},"2022":{"rev":59340,"op":11177,"opm":18.8,"food":30.09,"labor":26.97,"rent":3.5,"plat":6.79,"roy":5.27,"ad":1.94,"resid":6.6,"qsc":88.1,"claim":14.8,"b":50,"reg":2.6,"pt":5.0,"deliv":42.4,"app":14.0,"revisit":51.6,"orders":24820,"rating":4.1},"2023":{"rev":63351,"op":12299,"opm":19.4,"food":31.32,"labor":26.22,"rent":3.31,"plat":7.04,"roy":5.48,"ad":2.04,"resid":5.18,"qsc":86.4,"claim":14.4,"b":62,"reg":2.5,"pt":4.6,"deliv":43.8,"app":17.2,"revisit":53.8,"orders":24733,"rating":4.07},"2024":{"rev":66772,"op":11514,"opm":17.2,"food":31.0,"labor":27.17,"rent":3.24,"plat":6.97,"roy":5.43,"ad":1.98,"resid":6.96,"qsc":85.8,"claim":14.8,"b":88,"reg":2.2,"pt":4.5,"deliv":43.8,"app":21.6,"revisit":52.4,"orders":24486,"rating":4.07},"2025":{"rev":69104,"op":11853,"opm":17.2,"food":30.12,"labor":29.27,"rent":3.21,"plat":7.18,"roy":5.41,"ad":1.89,"resid":5.76,"qsc":88.0,"claim":13.6,"b":38,"reg":2.8,"pt":4.5,"deliv":43.6,"app":26.0,"revisit":51.4,"orders":24820,"rating":4.07},"2026":{"rev":77297,"op":13972,"opm":18.1,"food":29.07,"labor":31.02,"rent":2.83,"plat":7.26,"roy":5.54,"ad":1.99,"resid":4.22,"qsc":89.6,"claim":14.2,"b":38,"reg":3.6,"pt":6.1,"deliv":43.6,"app":31.9,"revisit":51.4,"orders":27195,"rating":4.15}},"부산 서면점":{"2020":{"rev":51493,"op":7080,"opm":13.7,"food":30.53,"labor":24.3,"rent":5.81,"plat":9.14,"roy":4.97,"ad":1.82,"resid":9.69,"qsc":88.8,"claim":15.0,"b":38,"reg":3.6,"pt":6.0,"deliv":58.2,"app":5.8,"revisit":44.6,"orders":21988,"rating":4.09},"2021":{"rev":63264,"op":11304,"opm":17.9,"food":29.11,"labor":25.25,"rent":4.93,"plat":7.86,"roy":5.42,"ad":2.08,"resid":7.48,"qsc":88.9,"claim":17.8,"b":50,"reg":3.5,"pt":6.0,"deliv":50.0,"app":8.8,"revisit":53.0,"orders":27028,"rating":4.11},"2022":{"rev":72368,"op":12262,"opm":16.9,"food":29.31,"labor":28.13,"rent":4.44,"plat":6.85,"roy":5.21,"ad":1.78,"resid":7.34,"qsc":88.3,"claim":18.1,"b":62,"reg":3.5,"pt":6.9,"deliv":43.6,"app":13.7,"revisit":53.9,"orders":29128,"rating":4.1},"2023":{"rev":77139,"op":13260,"opm":17.2,"food":33.17,"labor":28.86,"rent":4.2,"plat":6.95,"roy":5.49,"ad":1.91,"resid":2.23,"qsc":88.2,"claim":19.2,"b":50,"reg":3.6,"pt":6.9,"deliv":42.1,"app":17.1,"revisit":53.8,"orders":30635,"rating":4.06},"2024":{"rev":80620,"op":11350,"opm":14.1,"food":32.29,"labor":29.29,"rent":4.04,"plat":7.01,"roy":5.31,"ad":1.91,"resid":6.09,"qsc":88.1,"claim":24.5,"b":62,"reg":3.4,"pt":6.4,"deliv":42.3,"app":21.6,"revisit":55.8,"orders":28397,"rating":4.18},"2025":{"rev":84675,"op":14296,"opm":16.9,"food":30.66,"labor":28.72,"rent":3.93,"plat":6.89,"roy":5.51,"ad":1.87,"resid":5.53,"qsc":90.5,"claim":16.8,"b":12,"reg":3.4,"pt":6.2,"deliv":42.9,"app":26.4,"revisit":53.5,"orders":29701,"rating":4.06},"2026":{"rev":89699,"op":18854,"opm":21.0,"food":29.82,"labor":28.85,"rent":3.68,"plat":6.97,"roy":5.63,"ad":2.02,"resid":2.02,"qsc":92.0,"claim":14.1,"b":12,"reg":3.2,"pt":7.4,"deliv":43.7,"app":34.8,"revisit":49.9,"orders":31040,"rating":3.97}},"서울 강남점":{"2020":{"rev":60026,"op":7142,"opm":11.9,"food":29.16,"labor":24.34,"rent":8.7,"plat":9.01,"roy":5.29,"ad":2.05,"resid":9.54,"qsc":91.6,"claim":15.2,"b":0,"reg":4.2,"pt":9.2,"deliv":56.5,"app":4.1,"revisit":48.2,"orders":24095,"rating":4.2},"2021":{"rev":75027,"op":10270,"opm":13.7,"food":28.94,"labor":27.06,"rent":6.93,"plat":7.68,"roy":5.38,"ad":1.91,"resid":8.41,"qsc":89.6,"claim":19.8,"b":50,"reg":4.5,"pt":9.5,"deliv":49.5,"app":9.6,"revisit":54.2,"orders":29638,"rating":4.21},"2022":{"rev":85002,"op":12928,"opm":15.2,"food":30.53,"labor":26.17,"rent":6.44,"plat":6.78,"roy":5.25,"ad":1.81,"resid":7.82,"qsc":89.6,"claim":28.1,"b":38,"reg":4.2,"pt":9.8,"deliv":43.4,"app":13.5,"revisit":55.8,"orders":33167,"rating":4.24},"2023":{"rev":89857,"op":13026,"opm":14.5,"food":32.55,"labor":27.49,"rent":6.14,"plat":6.81,"roy":5.62,"ad":2.14,"resid":4.76,"qsc":92.3,"claim":24.0,"b":0,"reg":4.5,"pt":9.1,"deliv":42.9,"app":17.5,"revisit":53.6,"orders":34229,"rating":4.16},"2024":{"rev":97879,"op":14581,"opm":14.9,"food":30.01,"labor":27.81,"rent":5.74,"plat":6.94,"roy":5.27,"ad":1.83,"resid":7.51,"qsc":91.8,"claim":19.9,"b":0,"reg":4.5,"pt":9.1,"deliv":42.1,"app":21.5,"revisit":54.9,"orders":32856,"rating":4.28},"2025":{"rev":99918,"op":15700,"opm":15.7,"food":29.4,"labor":28.58,"rent":5.73,"plat":6.84,"roy":5.25,"ad":2.03,"resid":6.44,"qsc":90.0,"claim":21.2,"b":25,"reg":4.9,"pt":9.2,"deliv":42.5,"app":24.8,"revisit":55.4,"orders":32568,"rating":4.25},"2026":{"rev":103744,"op":17043,"opm":16.4,"food":28.89,"labor":28.88,"rent":5.54,"plat":6.89,"roy":5.36,"ad":2.08,"resid":5.94,"qsc":89.9,"claim":20.4,"b":25,"reg":5.1,"pt":8.4,"deliv":43.8,"app":28.8,"revisit":55.8,"orders":33563,"rating":4.23}},"서울 홍대점":{"2020":{"rev":58242,"op":7866,"opm":13.5,"food":29.71,"labor":23.6,"rent":8.29,"plat":9.1,"roy":5.32,"ad":1.9,"resid":8.57,"qsc":88.7,"claim":18.9,"b":50,"reg":4.5,"pt":9.2,"deliv":58.8,"app":5.9,"revisit":46.1,"orders":23768,"rating":4.15},"2021":{"rev":72332,"op":9937,"opm":13.7,"food":30.11,"labor":25.2,"rent":6.78,"plat":7.73,"roy":5.12,"ad":1.91,"resid":9.41,"qsc":90.9,"claim":18.8,"b":38,"reg":4.8,"pt":9.1,"deliv":49.2,"app":10.0,"revisit":55.1,"orders":29135,"rating":4.21},"2022":{"rev":81844,"op":12798,"opm":15.6,"food":31.48,"labor":26.0,"rent":6.09,"plat":7.0,"roy":5.28,"ad":1.84,"resid":6.68,"qsc":90.4,"claim":22.4,"b":38,"reg":4.6,"pt":9.6,"deliv":44.1,"app":14.0,"revisit":54.3,"orders":31064,"rating":4.24},"2023":{"rev":86990,"op":15615,"opm":18.0,"food":32.77,"labor":25.95,"rent":5.86,"plat":6.86,"roy":5.41,"ad":2.03,"resid":3.16,"qsc":91.3,"claim":21.4,"b":12,"reg":4.4,"pt":9.8,"deliv":42.8,"app":17.2,"revisit":55.4,"orders":33355,"rating":4.21},"2024":{"rev":91101,"op":12573,"opm":13.8,"food":32.06,"labor":30.01,"rent":5.76,"plat":6.86,"roy":5.42,"ad":1.88,"resid":4.21,"qsc":91.5,"claim":21.6,"b":25,"reg":4.4,"pt":10.1,"deliv":43.0,"app":21.8,"revisit":54.5,"orders":32212,"rating":4.2},"2025":{"rev":95227,"op":14925,"opm":15.7,"food":31.37,"labor":28.49,"rent":5.49,"plat":7.34,"roy":5.49,"ad":2.07,"resid":4.07,"qsc":91.4,"claim":21.1,"b":25,"reg":4.5,"pt":9.6,"deliv":44.0,"app":25.6,"revisit":54.8,"orders":31031,"rating":4.16},"2026":{"rev":100692,"op":17506,"opm":17.4,"food":30.52,"labor":28.47,"rent":5.4,"plat":7.78,"roy":5.73,"ad":2.34,"resid":2.38,"qsc":90.6,"claim":26.7,"b":25,"reg":4.4,"pt":10.6,"deliv":45.1,"app":29.1,"revisit":53.6,"orders":31383,"rating":4.11}},"수원 영통점":{"2020":{"rev":49713,"op":7224,"opm":14.5,"food":28.44,"labor":24.64,"rent":5.04,"plat":8.59,"roy":5.14,"ad":1.77,"resid":11.85,"qsc":87.3,"claim":11.5,"b":75,"reg":3.4,"pt":6.1,"deliv":56.9,"app":5.4,"revisit":45.6,"orders":21664,"rating":4.14},"2021":{"rev":59825,"op":10518,"opm":17.6,"food":29.29,"labor":26.4,"rent":4.24,"plat":8.09,"roy":5.27,"ad":1.81,"resid":7.33,"qsc":88.4,"claim":15.4,"b":50,"reg":3.4,"pt":6.1,"deliv":50.5,"app":8.8,"revisit":52.6,"orders":26161,"rating":4.07},"2022":{"rev":69474,"op":13220,"opm":19.0,"food":29.91,"labor":25.78,"rent":3.74,"plat":7.03,"roy":5.2,"ad":1.91,"resid":7.4,"qsc":88.2,"claim":18.8,"b":62,"reg":3.6,"pt":6.2,"deliv":43.8,"app":13.7,"revisit":54.1,"orders":26970,"rating":4.18},"2023":{"rev":73141,"op":13541,"opm":18.5,"food":30.72,"labor":28.64,"rent":3.61,"plat":7.08,"roy":5.64,"ad":2.08,"resid":3.71,"qsc":87.3,"claim":19.5,"b":50,"reg":3.6,"pt":6.4,"deliv":42.4,"app":17.3,"revisit":53.6,"orders":28541,"rating":4.04},"2024":{"rev":78128,"op":13380,"opm":17.1,"food":31.71,"labor":29.71,"rent":3.39,"plat":7.31,"roy":5.5,"ad":1.99,"resid":3.27,"qsc":87.5,"claim":21.0,"b":50,"reg":3.6,"pt":5.8,"deliv":43.9,"app":20.9,"revisit":52.3,"orders":28986,"rating":4.1},"2025":{"rev":79711,"op":13587,"opm":17.0,"food":31.16,"labor":28.99,"rent":3.39,"plat":7.03,"roy":5.51,"ad":1.9,"resid":4.98,"qsc":87.7,"claim":19.1,"b":50,"reg":3.6,"pt":6.1,"deliv":42.8,"app":25.7,"revisit":53.2,"orders":27798,"rating":4.16},"2026":{"rev":81615,"op":14062,"opm":17.2,"food":30.51,"labor":27.52,"rent":3.35,"plat":6.86,"roy":5.33,"ad":1.88,"resid":7.32,"qsc":88.3,"claim":19.4,"b":50,"reg":3.6,"pt":9.3,"deliv":42.6,"app":33.7,"revisit":49.2,"orders":26684,"rating":4.21}},"인천 부평점":{"2020":{"rev":44176,"op":5917,"opm":13.4,"food":29.36,"labor":23.9,"rent":5.2,"plat":9.0,"roy":5.03,"ad":1.99,"resid":12.13,"qsc":87.5,"claim":12.8,"b":62,"reg":3.5,"pt":6.6,"deliv":58.5,"app":5.9,"revisit":44.8,"orders":18466,"rating":4.11},"2021":{"rev":54483,"op":9157,"opm":16.8,"food":30.66,"labor":25.41,"rent":4.37,"plat":8.0,"roy":5.28,"ad":1.84,"resid":7.63,"qsc":88.4,"claim":17.1,"b":38,"reg":3.6,"pt":6.8,"deliv":49.2,"app":9.2,"revisit":53.0,"orders":24117,"rating":4.1},"2022":{"rev":61540,"op":12425,"opm":20.2,"food":30.75,"labor":26.44,"rent":4.0,"plat":6.94,"roy":5.39,"ad":1.95,"resid":4.34,"qsc":85.4,"claim":18.5,"b":88,"reg":3.5,"pt":6.2,"deliv":42.4,"app":13.0,"revisit":50.3,"orders":25743,"rating":4.08},"2023":{"rev":67402,"op":12378,"opm":18.4,"food":32.39,"labor":28.16,"rent":3.59,"plat":6.96,"roy":5.61,"ad":2.11,"resid":2.81,"qsc":88.3,"claim":20.0,"b":38,"reg":3.9,"pt":6.1,"deliv":42.4,"app":18.4,"revisit":52.9,"orders":26718,"rating":4.14},"2024":{"rev":69485,"op":11299,"opm":16.3,"food":32.07,"labor":29.88,"rent":3.63,"plat":6.76,"roy":5.59,"ad":1.99,"resid":3.82,"qsc":88.8,"claim":19.1,"b":38,"reg":3.6,"pt":6.2,"deliv":42.4,"app":22.0,"revisit":52.3,"orders":25914,"rating":4.07},"2025":{"rev":73062,"op":13221,"opm":18.1,"food":30.93,"labor":28.22,"rent":3.48,"plat":6.86,"roy":5.39,"ad":2.06,"resid":4.97,"qsc":87.8,"claim":17.8,"b":62,"reg":3.5,"pt":6.4,"deliv":42.1,"app":25.5,"revisit":52.1,"orders":25339,"rating":4.04},"2026":{"rev":77596,"op":15908,"opm":20.5,"food":30.2,"labor":27.9,"rent":3.34,"plat":6.9,"roy":5.31,"ad":2.01,"resid":3.84,"qsc":89.0,"claim":18.2,"b":62,"reg":3.4,"pt":5.4,"deliv":43.4,"app":28.3,"revisit":56.8,"orders":25388,"rating":4.02}},"제주 연동점":{"2020":{"rev":37601,"op":6237,"opm":16.6,"food":30.45,"labor":23.73,"rent":4.41,"plat":9.3,"roy":5.4,"ad":1.83,"resid":8.28,"qsc":85.3,"claim":9.8,"b":88,"reg":2.4,"pt":4.6,"deliv":59.6,"app":5.8,"revisit":44.6,"orders":17707,"rating":4.01},"2021":{"rev":46277,"op":7358,"opm":15.9,"food":31.17,"labor":26.49,"rent":3.69,"plat":7.73,"roy":5.46,"ad":1.91,"resid":7.66,"qsc":84.7,"claim":12.0,"b":88,"reg":2.6,"pt":4.9,"deliv":50.2,"app":9.2,"revisit":48.8,"orders":20962,"rating":4.01},"2022":{"rev":52465,"op":9544,"opm":18.2,"food":31.04,"labor":28.7,"rent":3.32,"plat":6.45,"roy":5.37,"ad":1.98,"resid":4.95,"qsc":86.7,"claim":15.9,"b":75,"reg":2.6,"pt":5.0,"deliv":40.8,"app":13.5,"revisit":51.0,"orders":24184,"rating":3.96},"2023":{"rev":55887,"op":10602,"opm":19.0,"food":30.92,"labor":26.47,"rent":3.14,"plat":7.01,"roy":5.46,"ad":1.89,"resid":6.13,"qsc":85.0,"claim":14.2,"b":75,"reg":2.2,"pt":3.8,"deliv":43.1,"app":17.4,"revisit":51.7,"orders":23098,"rating":4.06},"2024":{"rev":59050,"op":10353,"opm":17.5,"food":30.09,"labor":27.06,"rent":3.02,"plat":7.06,"roy":5.18,"ad":2.02,"resid":8.03,"qsc":85.9,"claim":16.6,"b":75,"reg":2.6,"pt":4.5,"deliv":43.0,"app":21.5,"revisit":51.2,"orders":22589,"rating":4.07},"2025":{"rev":61485,"op":9735,"opm":15.8,"food":32.07,"labor":28.94,"rent":3.0,"plat":7.01,"roy":5.4,"ad":2.12,"resid":5.62,"qsc":87.0,"claim":14.0,"b":62,"reg":2.2,"pt":4.9,"deliv":42.8,"app":25.0,"revisit":51.1,"orders":21468,"rating":4.1},"2026":{"rev":66133,"op":9374,"opm":14.2,"food":32.69,"labor":29.03,"rent":2.88,"plat":6.92,"roy":5.23,"ad":2.15,"resid":6.92,"qsc":88.4,"claim":13.3,"b":62,"reg":3.0,"pt":4.9,"deliv":42.9,"app":31.0,"revisit":51.1,"orders":21300,"rating":4.09}}},"monthly":[{"m":"2020-01","rev":55117,"opm":14.8,"labor":24.01,"food":30.35,"deliv":60.2,"app":5.7},{"m":"2020-02","rev":49964,"opm":14.3,"labor":26.17,"food":29.54,"deliv":61.0,"app":5.2},{"m":"2020-03","rev":48358,"opm":14.0,"labor":23.61,"food":31.09,"deliv":60.2,"app":5.2},{"m":"2020-04","rev":53162,"opm":13.8,"labor":24.63,"food":30.21,"deliv":60.2,"app":5.6},{"m":"2020-05","rev":55504,"opm":15.1,"labor":22.42,"food":28.64,"deliv":59.9,"app":5.6},{"m":"2020-06","rev":54861,"opm":13.5,"labor":24.18,"food":29.07,"deliv":61.3,"app":5.7},{"m":"2020-07","rev":58272,"opm":14.5,"labor":23.87,"food":30.06,"deliv":50.7,"app":5.0},{"m":"2020-08","rev":56140,"opm":14.5,"labor":23.09,"food":28.62,"deliv":49.3,"app":6.1},{"m":"2020-09","rev":59336,"opm":15.2,"labor":24.59,"food":30.53,"deliv":49.4,"app":6.1},{"m":"2020-10","rev":64629,"opm":18.2,"labor":25.51,"food":30.22,"deliv":48.6,"app":5.8},{"m":"2020-11","rev":67863,"opm":16.8,"labor":25.49,"food":30.32,"deliv":48.7,"app":4.8},{"m":"2020-12","rev":77758,"opm":17.6,"labor":25.74,"food":31.79,"deliv":51.9,"app":6.1},{"m":"2021-01","rev":72354,"opm":19.0,"labor":26.23,"food":30.29,"deliv":50.4,"app":9.5},{"m":"2021-02","rev":63928,"opm":15.8,"labor":27.62,"food":30.84,"deliv":49.6,"app":8.6},{"m":"2021-03","rev":63089,"opm":17.0,"labor":26.63,"food":30.62,"deliv":49.3,"app":9.4},{"m":"2021-04","rev":64140,"opm":15.4,"labor":25.45,"food":30.09,"deliv":49.4,"app":9.0},{"m":"2021-05","rev":66733,"opm":15.3,"labor":25.31,"food":30.66,"deliv":50.0,"app":9.2},{"m":"2021-06","rev":65911,"opm":14.9,"labor":25.2,"food":29.52,"deliv":50.6,"app":9.9},{"m":"2021-07","rev":67246,"opm":15.7,"labor":26.22,"food":29.06,"deliv":51.3,"app":9.3},{"m":"2021-08","rev":65917,"opm":15.6,"labor":23.47,"food":28.09,"deliv":48.0,"app":9.4},{"m":"2021-09","rev":69193,"opm":19.3,"labor":25.26,"food":28.43,"deliv":50.2,"app":9.6},{"m":"2021-10","rev":71748,"opm":17.2,"labor":25.18,"food":30.94,"deliv":50.7,"app":9.1},{"m":"2021-11","rev":75266,"opm":18.9,"labor":27.71,"food":30.84,"deliv":51.8,"app":10.2},{"m":"2021-12","rev":84563,"opm":17.8,"labor":27.87,"food":32.63,"deliv":49.1,"app":10.4},{"m":"2022-01","rev":81811,"opm":19.5,"labor":27.61,"food":31.57,"deliv":40.8,"app":13.6},{"m":"2022-02","rev":74760,"opm":13.7,"labor":30.68,"food":33.95,"deliv":43.2,"app":12.9},{"m":"2022-03","rev":71504,"opm":19.0,"labor":26.77,"food":30.27,"deliv":44.4,"app":13.7},{"m":"2022-04","rev":73243,"opm":20.2,"labor":26.78,"food":29.22,"deliv":42.2,"app":13.1},{"m":"2022-05","rev":77049,"opm":17.9,"labor":26.96,"food":31.24,"deliv":43.2,"app":14.0},{"m":"2022-06","rev":76236,"opm":18.2,"labor":26.62,"food":31.33,"deliv":42.0,"app":13.8},{"m":"2022-07","rev":74045,"opm":16.8,"labor":26.11,"food":28.86,"deliv":42.7,"app":14.8},{"m":"2022-08","rev":72257,"opm":16.4,"labor":24.86,"food":29.43,"deliv":44.4,"app":13.0},{"m":"2022-09","rev":76515,"opm":17.1,"labor":26.61,"food":30.2,"deliv":43.9,"app":13.3},{"m":"2022-10","rev":79673,"opm":18.1,"labor":25.75,"food":29.68,"deliv":42.6,"app":13.7},{"m":"2022-11","rev":82989,"opm":18.0,"labor":27.18,"food":31.87,"deliv":42.8,"app":14.7},{"m":"2022-12","rev":94649,"opm":20.2,"labor":28.98,"food":31.89,"deliv":43.6,"app":14.5},{"m":"2023-01","rev":87333,"opm":19.2,"labor":30.48,"food":33.23,"deliv":42.0,"app":17.5},{"m":"2023-02","rev":79512,"opm":17.1,"labor":27.55,"food":32.4,"deliv":44.0,"app":18.0},{"m":"2023-03","rev":76966,"opm":18.1,"labor":27.46,"food":30.87,"deliv":42.2,"app":17.1},{"m":"2023-04","rev":79023,"opm":17.7,"labor":28.99,"food":32.02,"deliv":41.9,"app":17.3},{"m":"2023-05","rev":83051,"opm":16.7,"labor":27.29,"food":31.73,"deliv":42.8,"app":17.5},{"m":"2023-06","rev":82229,"opm":14.4,"labor":28.59,"food":31.1,"deliv":44.6,"app":17.5},{"m":"2023-07","rev":79016,"opm":18.3,"labor":24.94,"food":31.1,"deliv":42.4,"app":17.6},{"m":"2023-08","rev":76605,"opm":19.3,"labor":24.61,"food":30.09,"deliv":40.8,"app":17.6},{"m":"2023-09","rev":82368,"opm":15.6,"labor":27.03,"food":31.06,"deliv":44.0,"app":17.2},{"m":"2023-10","rev":83641,"opm":17.6,"labor":28.53,"food":32.47,"deliv":42.7,"app":16.1},{"m":"2023-11","rev":88725,"opm":19.8,"labor":27.06,"food":30.59,"deliv":41.6,"app":17.2},{"m":"2023-12","rev":100245,"opm":19.0,"labor":28.98,"food":34.51,"deliv":43.7,"app":17.2},{"m":"2024-01","rev":91759,"opm":17.7,"labor":30.89,"food":32.19,"deliv":42.6,"app":21.3},{"m":"2024-02","rev":83298,"opm":15.1,"labor":30.22,"food":32.35,"deliv":43.7,"app":22.5},{"m":"2024-03","rev":81202,"opm":16.6,"labor":29.3,"food":32.27,"deliv":43.4,"app":21.3},{"m":"2024-04","rev":83870,"opm":14.5,"labor":29.16,"food":31.25,"deliv":43.2,"app":21.6},{"m":"2024-05","rev":87168,"opm":17.9,"labor":26.16,"food":30.57,"deliv":42.4,"app":20.9},{"m":"2024-06","rev":84864,"opm":18.4,"labor":27.87,"food":31.77,"deliv":42.9,"app":21.5},{"m":"2024-07","rev":84533,"opm":13.1,"labor":29.41,"food":29.88,"deliv":43.4,"app":22.2},{"m":"2024-08","rev":82318,"opm":15.6,"labor":25.85,"food":28.7,"deliv":43.1,"app":21.6},{"m":"2024-09","rev":85286,"opm":17.2,"labor":29.22,"food":30.68,"deliv":42.6,"app":22.2},{"m":"2024-10","rev":88363,"opm":16.0,"labor":28.8,"food":31.24,"deliv":44.0,"app":20.9},{"m":"2024-11","rev":94156,"opm":18.3,"labor":28.56,"food":31.66,"deliv":43.9,"app":20.9},{"m":"2024-12","rev":106203,"opm":18.5,"labor":28.78,"food":32.43,"deliv":41.8,"app":21.9},{"m":"2025-01","rev":95921,"opm":19.0,"labor":28.4,"food":31.63,"deliv":42.8,"app":25.2},{"m":"2025-02","rev":87834,"opm":17.5,"labor":29.01,"food":30.92,"deliv":42.3,"app":26.6},{"m":"2025-03","rev":84764,"opm":13.8,"labor":30.06,"food":31.95,"deliv":44.0,"app":24.9},{"m":"2025-04","rev":86037,"opm":14.2,"labor":30.32,"food":31.62,"deliv":43.7,"app":26.2},{"m":"2025-05","rev":91094,"opm":18.9,"labor":28.16,"food":31.12,"deliv":41.9,"app":25.6},{"m":"2025-06","rev":88768,"opm":17.6,"labor":27.63,"food":31.58,"deliv":42.9,"app":25.5},{"m":"2025-07","rev":86880,"opm":15.2,"labor":28.48,"food":29.91,"deliv":42.7,"app":25.5},{"m":"2025-08","rev":84307,"opm":14.2,"labor":28.14,"food":29.91,"deliv":42.8,"app":25.2},{"m":"2025-09","rev":88931,"opm":15.5,"labor":29.58,"food":29.17,"deliv":41.9,"app":24.8},{"m":"2025-10","rev":91288,"opm":18.3,"labor":29.51,"food":31.04,"deliv":43.8,"app":24.4},{"m":"2025-11","rev":97727,"opm":17.7,"labor":27.3,"food":31.28,"deliv":44.2,"app":24.8},{"m":"2025-12","rev":111276,"opm":18.7,"labor":29.55,"food":30.71,"deliv":44.2,"app":25.2},{"m":"2026-01","rev":100247,"opm":21.1,"labor":27.9,"food":32.11,"deliv":42.4,"app":30.2},{"m":"2026-02","rev":93579,"opm":21.1,"labor":28.02,"food":28.92,"deliv":40.6,"app":32.0},{"m":"2026-03","rev":89120,"opm":13.0,"labor":30.58,"food":31.68,"deliv":43.9,"app":29.2},{"m":"2026-04","rev":89924,"opm":14.7,"labor":30.58,"food":31.83,"deliv":44.3,"app":31.5},{"m":"2026-05","rev":95071,"opm":21.5,"labor":30.34,"food":31.88,"deliv":41.4,"app":31.7},{"m":"2026-06","rev":95307,"opm":17.2,"labor":27.48,"food":31.31,"deliv":42.9,"app":31.8},{"m":"2026-07","rev":93224,"opm":15.8,"labor":28.75,"food":29.85,"deliv":46.7,"app":31.7},{"m":"2026-08","rev":90978,"opm":14.5,"labor":28.3,"food":29.79,"deliv":42.8,"app":31.9}]};
+const tip=document.getElementById('tip');
+function show(e,h){tip.innerHTML=h;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+16,innerWidth-275)+'px';tip.style.top=(e.clientY+16)+'px'}
+function hide(){tip.style.opacity=0}
+const NS='http://www.w3.org/2000/svg';
+function el(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function txt(p,x,y,s,a){const t=el('text',Object.assign({x,y},a||{}),p);t.textContent=s;return t}
+function svgIn(c,W,H){c.innerHTML='';return el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'},c)}
+function svg(id,W,H){return svgIn(document.getElementById(id),W,H)}
+function hit(p,a,h,click){const r=el('rect',Object.assign({class:'hit'+(click?' bar-click':'')},a),p);r.addEventListener('mousemove',e=>show(e,h));r.addEventListener('mouseleave',hide);if(click)r.addEventListener('click',click);return r}
+const sc=(d0,d1,r0,r1)=>v=>r0+(v-d0)/(d1-d0)*(r1-r0);
+function yAxis(s,y,ticks,x0,x1,f){ticks.forEach((t,i)=>{el('line',{x1:x0,x2:x1,y1:y(t),y2:y(t),class:i===0?'axis':'grid'},s);txt(s,x0-10,y(t)+4,f(t),{'text-anchor':'end'})})}
+const COL={s1:'#7ea6ff',s2:'#e2b866',ink:'#eceef1',ctx:'#4b525d',good:'#5fd3a8',bad:'#ff8574',accent:'#e2b866',bg:'#1c1f24'};
+function niceTicks(lo,hi,n){const raw=(hi-lo)/n,p=Math.pow(10,Math.floor(Math.log10(raw)));const m=[1,2,2.5,5,10].find(k=>raw<=p*k)*p;const a=Math.floor(lo/m)*m,b=Math.ceil(hi/m)*m;const t=[];for(let v=a;v<=b+1e-9;v+=m)t.push(+v.toFixed(6));return t}
+let gid=0;
+function grad(s,color,op){const id='g'+(++gid);const d=el('defs',{},s);const g=el('linearGradient',{id,x1:0,y1:0,x2:0,y2:1},d);el('stop',{offset:'0%','stop-color':color,'stop-opacity':op||.28},g);el('stop',{offset:'100%','stop-color':color,'stop-opacity':0},g);return `url(#${id})`}
+
+function lines(id,xs,series,o){
+  o=o||{};const W=o.W||540,H=o.H||290,L=o.L||48,R=o.R||58,T=16,B=32,s=svg(id,W,H);
+  const all=series.flatMap(se=>se.v).filter(v=>v!=null);const ticks=o.ticks||niceTicks(Math.min(...all),Math.max(...all),5);
+  const y=sc(ticks[0],ticks[ticks.length-1],H-B,T);yAxis(s,y,ticks,L,W-R,o.f);
+  const step=(W-L-R)/Math.max(1,xs.length-1),X=i=>L+step*i;const every=o.every||1;
+  xs.forEach((x,i)=>{if(i%every===0)txt(s,X(i),H-8,o.xl?o.xl(x):x,{'text-anchor':'middle'})});
+  series.forEach(se=>{const pts=se.v.map((v,i)=>v==null?null:[X(i),y(v)]).filter(Boolean);if(!pts.length)return;
+    if(se.area){const f=grad(s,se.c,se.area);el('path',{d:`M${pts[0][0]},${H-B} `+pts.map(p=>'L'+p.join(',')).join(' ')+` L${pts[pts.length-1][0]},${H-B} Z`,fill:f},s)}
+    el('polyline',{points:pts.map(p=>p.join(',')).join(' '),fill:'none',stroke:se.c,'stroke-width':se.w||1.8,'stroke-linejoin':'round','stroke-linecap':'round','stroke-dasharray':se.dash||'',opacity:se.op||1},s);
+    const l=pts[pts.length-1];
+    if(se.end!==false){el('circle',{cx:l[0],cy:l[1],r:7,fill:se.c,opacity:.18},s);el('circle',{cx:l[0],cy:l[1],r:3.2,fill:se.c},s);txt(s,l[0]+10,l[1]+4,o.f(se.v.filter(v=>v!=null).slice(-1)[0]),{class:'lab'})}});
+  const g=el('line',{y1:T,y2:H-B,stroke:'#e2b866','stroke-opacity':.5,'stroke-dasharray':'2 4',opacity:0},s);
+  xs.forEach((x,i)=>{const r=hit(s,{x:X(i)-step/2,y:T,width:step,height:H-B-T},'');r.addEventListener('mousemove',e=>{g.setAttribute('x1',X(i));g.setAttribute('x2',X(i));g.setAttribute('opacity',1);show(e,`<b>${x}</b><br>`+series.filter(se=>se.v[i]!=null&&se.n).map(se=>`${se.n} · ${o.f(se.v[i])}`).join('<br>'))});r.addEventListener('mouseleave',()=>g.setAttribute('opacity',0))});
+}
+function spark(c,vals,color){const W=200,H=26,s=svgIn(c,W,H);s.setAttribute('preserveAspectRatio','none');s.classList.add('spark');const lo=Math.min(...vals),hi=Math.max(...vals);const x=i=>i/(vals.length-1)*(W-4)+2,y=v=>H-3-(v-lo)/(hi-lo||1)*(H-6);
+  const pts=vals.map((v,i)=>[x(i),y(v)]);const f=grad(s,color,.25);el('path',{d:`M2,${H} `+pts.map(p=>'L'+p.join(',')).join(' ')+` L${W-2},${H} Z`,fill:f},s);
+  el('polyline',{points:pts.map(p=>p.join(',')).join(' '),fill:'none',stroke:color,'stroke-width':1.5,'vector-effect':'non-scaling-stroke'},s)}
+
+/* ---------- derived ---------- */
+const STORES=Object.keys(DATA.stores);
+const SV={'서울 강남점':'SV-01','서울 홍대점':'SV-01','수원 영통점':'SV-01','인천 부평점':'SV-01','대전 둔산점':'SV-02','광주 충장로점':'SV-02','제주 연동점':'SV-02','대구 동성로점':'SV-03','부산 서면점':'SV-03'};
+const EVENTS={
+ '광주 충장로점':[['2022-05','위생검사 B, 선입선출 미준수 (EV-014)'],['2026-01','점주 승계, 정규직 이탈, QSC 76.9 (EV-029)']],
+ '제주 연동점':[['2023-05','위생검사 B, B등급 빈도 최다 (EV-017)'],['2025-04','정규직 1명 퇴사 (EV-025)'],['2026-04','정규 1.3명·PT 12명, 이익률 3.7% (EV-035)'],['2026-08','관광 성수기 매출 최고, 이익률 10.8% (EV-039)']],
+ '부산 서면점':[['2020-06','지역 감염 재확산 (EV-005, 추정)'],['2024-02','주방 확장 리뉴얼 (EV-022)'],['2024-09','클레임 9건 (EV-023, 추정)']],
+ '서울 홍대점':[['2020-04','대학 비대면 전환 (EV-003)'],['2023-03','배달 지연 클레임 33건 (EV-016)'],['2025-10','경쟁 브랜드 개점 (EV-027, 추정)'],['2026-04','배달 지연 클레임 87건 (EV-034)']],
+ '서울 강남점':[['2022-01','배달대행사 교체, 클레임 증가 (EV-013)'],['2023-10','클레임 36건, 연중 최다 (EV-020)']],
+ '대구 동성로점':[['2020-06','슈림프 골드 시범 판매 (EV-004)'],['2025-12','겨울 한정 메뉴 시범 (EV-028)'],['2026-02','내부 공사 7일 휴업 (EV-031)']],
+ '대전 둔산점':[['2026-01','실적 이중 등록, 정산본 유지 (EV-036)']],
+ '인천 부평점':[['2021-11','위생검사 B 등급 (EV-011)']],
+ '수원 영통점':[]};
+const YRS=[2020,2021,2022,2023,2024,2025,2026];
+function company(year,ytd){const src=ytd?DATA.storesYTD:DATA.stores;let rev=0,acc={};STORES.forEach(s=>{const d=src[s][year];if(!d)return;rev+=d.rev;['food','labor','rent','plat','roy','ad','resid'].forEach(k=>acc[k]=(acc[k]||0)+d[k]*d.rev)});const o={};for(const k in acc)o[k]=acc[k]/rev;return o}
+
+/* ---------- state ---------- */
+const DEF={page:'home',range:'all',cost:'labor',metric:'opm',store:'광주 충장로점',years:[2024,2025,2026],inits:{labor:true,coupon:true,turn:true,app:true}};
+let S=JSON.parse(JSON.stringify(DEF));
+const TITLES={home:'Overview',growth:'성장 엔진',cost:'비용·인력',channel:'고객 확보비',stores:'매장 포트폴리오',data:'데이터·리스크',action:'Value & 실행'};
+function go(p){S.page=p;document.querySelectorAll('.page').forEach(x=>x.hidden=x.dataset.page!==p);
+  document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.go===p));
+  document.getElementById('crumb').textContent=TITLES[p];document.getElementById('btnHome').classList.toggle('on',p==='home');
+  hide();render(p);window.scrollTo({top:0})}
+
+/* ---------- home ---------- */
+function rHome(){
+  const W=440,H=440,cx=220,cy=220,s=svg('dial',W,H);
+  const d=el('defs',{},s);
+  const rg=el('radialGradient',{id:'face',cx:'40%',cy:'35%',r:'75%'},d);el('stop',{offset:'0%','stop-color':'#262a31'},rg);el('stop',{offset:'100%','stop-color':'#181a1e'},rg);
+  const ag=el('linearGradient',{id:'arc',x1:0,y1:1,x2:1,y2:0},d);el('stop',{offset:'0%','stop-color':'#b48a3f'},ag);el('stop',{offset:'100%','stop-color':'#f3d08e'},ag);
+  const fl=el('filter',{id:'glow',x:'-20%',y:'-20%',width:'140%',height:'140%'},d);el('feGaussianBlur',{stdDeviation:5,result:'b'},fl);const mg=el('feMerge',{},fl);el('feMergeNode',{in:'b'},mg);el('feMergeNode',{in:'SourceGraphic'},mg);
+  const sd=el('filter',{id:'neu',x:'-30%',y:'-30%',width:'160%',height:'160%'},d);el('feDropShadow',{dx:12,dy:12,stdDeviation:14,'flood-color':'#0e1013','flood-opacity':.9},sd);el('feDropShadow',{dx:-10,dy:-10,stdDeviation:12,'flood-color':'#2c3037','flood-opacity':.9},sd);
+  el('circle',{cx,cy,r:188,fill:'#1d2025',filter:'url(#neu)'},s);
+  el('circle',{cx,cy,r:150,fill:'url(#face)',stroke:'rgba(255,255,255,.04)'},s);
+  // scale 0..25% over 270deg
+  const a0=135,span=270,max=25,ang=v=>(a0+v/max*span)*Math.PI/180,pt=(v,r)=>[cx+r*Math.cos(ang(v)),cy+r*Math.sin(ang(v))];
+  for(let v=0;v<=max;v+=0.5){const major=v%5===0;const [x1,y1]=pt(v,major?170:174),[x2,y2]=pt(v,180);el('line',{x1,y1,x2,y2,stroke:major?'#8a919c':'#3d434c','stroke-width':major?1.6:1},s);if(major){const [tx,ty]=pt(v,158);txt(s,tx,ty+4,v+'%',{'text-anchor':'middle',style:'font-size:10px;fill:#6c737f'})}}
+  const arc=(v0,v1,r)=>{const [x0,y0]=pt(v0,r),[x1,y1]=pt(v1,r);const large=(v1-v0)/max*span>180?1:0;return `M${x0},${y0} A${r},${r} 0 ${large} 1 ${x1},${y1}`};
+  el('path',{d:arc(0,max,132),fill:'none',stroke:'#14161a','stroke-width':12,'stroke-linecap':'round'},s);
+  el('path',{d:arc(0,16.8,132),fill:'none',stroke:'url(#arc)','stroke-width':12,'stroke-linecap':'round',filter:'url(#glow)'},s);
+  el('path',{d:arc(16.8,20.3,132),fill:'none',stroke:'#e2b866','stroke-opacity':.35,'stroke-width':12,'stroke-dasharray':'3 5'},s);
+  const [nx,ny]=pt(16.8,112);el('line',{x1:cx,y1:cy,x2:nx,y2:ny,stroke:'#e2b866','stroke-width':2,'stroke-linecap':'round'},s);
+  el('circle',{cx,cy,r:9,fill:'#22262c',stroke:'#e2b866','stroke-width':1.5},s);
+  const [px,py]=pt(20.3,132);el('circle',{cx:px,cy:py,r:5,fill:'#1c1f24',stroke:'#f3d08e','stroke-width':1.5},s);
+  txt(s,cx,cy+54,'16.8%',{'text-anchor':'middle',style:'font-size:44px;font-weight:300;fill:#eceef1;letter-spacing:-1px'});
+  txt(s,cx,cy+76,'OPERATING MARGIN · FY2025',{'text-anchor':'middle',style:'font-size:9.5px;letter-spacing:2.5px;fill:#6c737f'});
+  txt(s,cx,cy+100,'잠재 20.3%  ·  +3.5%p',{'text-anchor':'middle',class:'ko',style:'font-size:12px;fill:#e2b866;font-family:Noto Sans KR,sans-serif'});
+  hit(s,{x:30,y:30,width:380,height:380},'<b>영업이익률 계기판</b><br>2025 실적 16.8%<br>5대 과제 실행 시 약 20.3% (점선 구간)');
+  // insight strip
+  const yrRev=YRS.slice(0,6).map(y=>STORES.reduce((t,s)=>t+DATA.stores[s][y].rev,0));
+  const labor=YRS.map(y=>company(y,y===2026).labor);
+  const items=[
+    ['growth','01','주문 증가율','−1.1%','2023~25 연평균, 성장은 객단가 의존',[22.3,9.6,2.0,-2.4,-0.9,2.4],COL.s1],
+    ['cost','02','인건비율','29.0%','2020 대비 +4.5%p, 최대 손익 압박',labor,COL.bad],
+    ['channel','03','고객 확보비','16%','쿠폰 9% + 수수료 7%, 재방문율 정체',[3757,3855,4071,4345,4662,4886,4927],COL.s2],
+    ['stores','04','하위 매장','2곳','충장로 −10.6%, 연동 −3.7% (이익 YoY)',YRS.map(y=>DATA.stores['광주 충장로점'][y].opm),COL.bad],
+    ['data','05','손익 잔차','5.0%','매장·월 63%가 ±5% 초과',YRS.map(y=>company(y,y===2026).resid),COL.ink]];
+  const st=document.getElementById('strip');st.innerHTML='';
+  items.forEach(([p,n,k,v,c,sp,col])=>{const b=document.createElement('button');b.className='ins';b.innerHTML=`<div class="top2"><span>${n} · ${k}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div class="big">${v}</div><div class="sp"></div><div class="cap">${c}</div>`;b.onclick=()=>go(p);st.appendChild(b);spark(b.querySelector('.sp'),sp,col)});
+}
+
+/* ---------- pages ---------- */
+function rGrowth(){
+  const yrs=['2021','2022','2023','2024','2025','2026'],o=[22.3,9.6,2.0,-2.4,-0.9,2.4],a=[0.4,3.6,5.1,8.1,4.9,3.4],r=[22.7,13.5,7.1,5.5,3.9,5.9];
+  const W=900,H=300,L=48,R=20,T=20,B=34,s=svg('cGrowth',W,H),y=sc(-5,25,H-B,T);yAxis(s,y,[-5,0,5,10,15,20,25],L,W-R,v=>v+'%');
+  el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:'rgba(255,255,255,.18)'},s);
+  const bw=(W-L-R)/yrs.length;
+  yrs.forEach((yr,i)=>{const cx=L+bw*i+bw/2;[[o[i],COL.s1,-1],[a[i],COL.s2,1]].forEach(([v,c,sd])=>{const y0=y(0),y1=y(v);el('rect',{x:cx+(sd<0?-21:3),y:Math.min(y0,y1),width:18,height:Math.max(1.5,Math.abs(y1-y0)),rx:5,fill:c,opacity:.9},s)});
+    txt(s,cx,H-10,yr==='2026'?'2026 YTD':yr,{'text-anchor':'middle'});
+    hit(s,{x:cx-bw/2,y:T,width:bw,height:H-B-T},`<b>${yr} · 1~8월</b><br>매출 ${r[i]>0?'+':''}${r[i]}%<br>주문 ${o[i]>0?'+':''}${o[i]}% · 객단가 +${a[i]}%`)});
+  const pts=yrs.map((_,i)=>[L+bw*i+bw/2,y(r[i])]);el('polyline',{points:pts.map(p=>p.join(',')).join(' '),fill:'none',stroke:COL.ink,'stroke-width':1.4,'stroke-dasharray':'1 0'},s);
+  pts.forEach((p,i)=>{el('circle',{cx:p[0],cy:p[1],r:3.5,fill:COL.bg,stroke:COL.ink,'stroke-width':1.5},s);txt(s,p[0]+9,p[1]-9,r[i]+'%',{class:'lab'})});
+  s.querySelectorAll('.hit').forEach(h=>s.appendChild(h));
+  document.querySelectorAll('#chRange .chip').forEach(c=>c.classList.toggle('on',c.dataset.v===S.range));
+  const M=DATA.monthly.filter(m=>S.range==='all'||m.m>=S.range);
+  lines('cRev',M.map(m=>m.m),[{n:'매출',v:M.map(m=>m.rev/10000),c:COL.s2,area:.3,w:2}],{W:900,H:260,f:v=>(+v).toFixed(1)+'억',every:M.length>40?12:(M.length>16?3:1)});
+}
+function rCost(){
+  const steps=[['2020',14.33,1],['인건비',-5.00],['식자재',-1.26],['로열티·광고',-0.50],['임차료',2.15],['플랫폼',1.92],['잔차 축소',5.81],['2026',17.45,1]];
+  const W=540,H=300,L=40,R=10,T=22,B=40,s=svg('cBridge',W,H),y=sc(0,24,H-B,T);yAxis(s,y,[0,5,10,15,20],L,W-R,v=>v+'%');
+  const bw=(W-L-R)/steps.length;let cum=0,prevTop=null;
+  steps.forEach(([n,v,t],i)=>{const x=L+bw*i+bw*.22,w=bw*.56;let a,b,c;if(t){a=0;b=v;cum=v;c=COL.s2}else{a=cum;b=cum+v;cum=b;c=v<0?COL.bad:COL.good}
+    if(i>0)el('line',{x1:x-bw*.44,x2:x,y1:y(t?v:a),y2:y(t?v:a),stroke:'rgba(255,255,255,.15)','stroke-dasharray':'2 3'},s);
+    el('rect',{x,y:y(Math.max(a,b)),width:w,height:Math.max(1.5,Math.abs(y(a)-y(b))),rx:4,fill:c,opacity:t?1:.85},s);
+    txt(s,x+w/2,y(Math.max(a,b))-7,(t?'':(v>0?'+':'−'))+Math.abs(v).toFixed(1),{'text-anchor':'middle',class:'lab'});
+    txt(s,x+w/2,H-14,n,{'text-anchor':'middle',class:'ko',style:'font-size:10.5px'});
+    hit(s,{x:L+bw*i,y:T,width:bw,height:H-B-T},`<b>${n}</b><br>${t?v.toFixed(1)+'%':(v>0?'+':'')+v.toFixed(2)+'%p'}`)});
+  lines('cIdx',YRS.map(String),[{n:'1인당 인건비',v:[100,123,141,157,171,181,174],c:COL.s2,area:.18},{n:'1인당 처리 주문',v:[100,115,121,126,123,123,118],c:COL.s1}],{f:v=>String(Math.round(v)),ticks:[90,110,130,150,170,190]});
+  const items=[['labor','인건비'],['food','식자재'],['rent','임차료'],['plat','플랫폼'],['roy','로열티'],['ad','광고'],['resid','잔차']];
+  const box=document.getElementById('chCost');box.innerHTML='';items.forEach(([k,n])=>{const b=document.createElement('button');b.className='chip'+(k===S.cost?' on':'');b.textContent=n;b.onclick=()=>{S.cost=k;rCost()};box.appendChild(b)});
+  const nm=items.find(i=>i[0]===S.cost)[1];
+  lines('cCost',YRS.map(y=>y===2026?'2026 YTD':String(y)),[{n:nm,v:YRS.map(y=>company(y,y===2026)[S.cost]),c:COL.s2,area:.25,w:2}],{W:900,H:240,f:v=>(+v).toFixed(1)+'%'});
+}
+function rChannel(){
+  const X=YRS.map(String);
+  lines('cFee',X,[{n:'외부앱 수수료',v:[3757,3855,4071,4345,4662,4886,4927],c:COL.s1,area:.18},{n:'쿠폰',v:[2078,2091,2214,2430,2538,2612,2705],c:COL.s2,area:.12}],{f:v=>Math.round(v).toLocaleString()+'원',ticks:[0,1000,2000,3000,4000,5000,6000],R:72,L:52});
+  lines('cMix',X,[{n:'자사앱',v:[5.6,9.5,13.8,17.3,21.6,25.3,31.3],c:COL.s1,area:.15},{n:'배달',v:[55.1,50.0,43.0,42.7,43.1,43.1,43.1],c:COL.s2},{n:'재방문율',v:[45.5,52.7,53.2,53.4,53.1,53.2,52.1],c:COL.ink,dash:'4 4'}],{f:v=>(+v).toFixed(1)+'%',ticks:[0,10,20,30,40,50,60],R:58});
+}
+function metricVals(s){const a=DATA.storesYTD[s][2025],b=DATA.storesYTD[s][2026];
+  return{opm:[a.opm,b.opm],qsc:[a.qsc,b.qsc],claim:[a.claim,b.claim],opyoy:[null,(b.op/a.op-1)*100],revyoy:[null,(b.rev/a.rev-1)*100]}[S.metric]}
+function rStores(){
+  document.querySelectorAll('#chMetric .chip').forEach(c=>c.classList.toggle('on',c.dataset.v===S.metric));
+  const lowerBetter=S.metric==='claim',isYoY=S.metric.endsWith('yoy');
+  const rows=STORES.map(s=>({s,v:metricVals(s)})).sort((p,q)=>lowerBetter?p.v[1]-q.v[1]:q.v[1]-p.v[1]);
+  const fmt=v=>S.metric==='qsc'||S.metric==='claim'?v.toFixed(1):(isYoY&&v>0?'+':'')+v.toFixed(1)+'%';
+  const allv=rows.flatMap(r=>r.v.filter(v=>v!=null));let lo=Math.min(0,...allv),hi=Math.max(...allv);
+  if(S.metric==='qsc'){lo=78;hi=94}if(S.metric==='opm'){lo=12;hi=22}
+  const ticks=niceTicks(lo,hi,5);
+  const W=900,H=340,L=120,R=64,T=10,B=26,s=svg('cRank',W,H),x=sc(ticks[0],ticks[ticks.length-1],L,W-R),rh=(H-T-B)/rows.length;
+  ticks.forEach(t=>{el('line',{x1:x(t),x2:x(t),y1:T,y2:H-B,class:t===0&&isYoY?'axis':'grid'},s);txt(s,x(t),H-6,isYoY||S.metric==='opm'?t+'%':String(t),{'text-anchor':'middle'})});
+  rows.forEach((r,i)=>{const cy=T+rh*i+rh/2,sel=r.s===S.store;
+    if(sel)el('rect',{x:2,y:cy-rh/2+3,width:W-4,height:rh-6,rx:10,fill:'rgba(226,184,102,.07)',stroke:'rgba(226,184,102,.35)'},s);
+    txt(s,L-14,cy+4,r.s,{'text-anchor':'end',class:'ko'+(sel?' lab':''),style:'font-size:12px'});
+    if(isYoY){const v=r.v[1];el('rect',{x:Math.min(x(0),x(v)),y:cy-6,width:Math.max(2,Math.abs(x(v)-x(0))),height:12,rx:6,fill:v>=0?COL.good:COL.bad,opacity:sel?1:.75},s);txt(s,Math.max(x(0),x(v))+10,cy+4,fmt(v),{class:'lab'})}
+    else{const[a,b]=r.v,better=lowerBetter?b<=a:b>=a,c=better?COL.good:COL.bad;
+      el('line',{x1:x(a),x2:x(b),y1:cy,y2:cy,stroke:c,'stroke-width':sel?3:2,'stroke-linecap':'round',opacity:.85},s);
+      el('circle',{cx:x(a),cy,r:4.5,fill:COL.bg,stroke:'#6c737f','stroke-width':1.5},s);el('circle',{cx:x(b),cy,r:5.5,fill:c},s);
+      txt(s,x(Math.max(a,b))+12,cy+4,fmt(b),{class:'lab'})}
+    hit(s,{x:0,y:cy-rh/2,width:W,height:rh},`<b>${r.s}</b> · ${SV[r.s]}<br>`+(isYoY?`2026 1~8월 ${fmt(r.v[1])}`:`2025 ${fmt(r.v[0])} → 2026 ${fmt(r.v[1])}`),()=>{S.store=r.s;rStores()})});
+  const box=document.getElementById('storeBtns');box.innerHTML='';
+  ['SV-01','SV-02','SV-03'].forEach(sv=>{const h=document.createElement('div');h.className='svh';h.textContent=sv+(sv==='SV-02'?' · 관리 사각지대':'');box.appendChild(h);const g=document.createElement('div');g.className='stores';box.appendChild(g);
+    STORES.filter(s=>SV[s]===sv).forEach(s=>{const b=document.createElement('button');b.className='sb'+(s===S.store?' on':'');const v=DATA.storesYTD[s][2026].opm;b.innerHTML=`<span>${s.split(' ')[1]}</span><small>${v.toFixed(1)}%</small>`;b.title=s;b.onclick=()=>{S.store=s;rStores()};g.appendChild(b)})});
+  box.firstChild.style.marginTop='0';
+  const sv=[['SV-02',67,COL.bad],['SV-03',45,COL.ctx],['SV-01',41,COL.ctx]];const W2=540,H2=140,s2=svg('cSV',W2,H2),x2=sc(0,100,64,W2-50);
+  sv.forEach(([n,v,c],i)=>{const yy=12+i*42;txt(s2,52,yy+15,n,{'text-anchor':'end',class:n===SV[S.store]?'lab':''});el('rect',{x:64,y:yy+5,width:x2(100)-64,height:12,rx:6,fill:'#14161a'},s2);el('rect',{x:64,y:yy+5,width:x2(v)-64,height:12,rx:6,fill:c},s2);txt(s2,x2(v)+10,yy+15,v+'%',{class:'lab'});hit(s2,{x:0,y:yy-4,width:W2,height:40},`<b>${n}</b><br>위생 B등급 월 비율 ${v}%`)});
+  const d=DATA.stores[S.store],a=DATA.storesYTD[S.store][2025],b=DATA.storesYTD[S.store][2026];
+  const dlt=(x,y,inv,u)=>{const z=y-x;const good=inv?z<=0:z>=0;return `<span class="${good?'up':'dn'}">${z>0?'+':'−'}${Math.abs(z).toFixed(1)}${u}</span>`};
+  const det=document.getElementById('storeDetail');
+  det.innerHTML=`<div class="ch"><div><div class="eb" style="margin-bottom:4px">${SV[S.store]}</div><h3 style="font-size:18px;font-weight:500">${S.store}</h3><div class="sub">2026년 1~8월 · 전년 동기 대비</div></div></div>
+  <div class="mini">
+   <div class="kpi"><div class="k">영업이익률</div><div class="v">${b.opm.toFixed(1)}<small>%</small></div><div class="d">${dlt(a.opm,b.opm,false,'%p')}</div></div>
+   <div class="kpi"><div class="k">영업이익 YoY</div><div class="v ${b.op>=a.op?'up':'dn'}">${b.op>=a.op?'+':'−'}${Math.abs((b.op/a.op-1)*100).toFixed(1)}<small>%</small></div><div class="d">매출 ${((b.rev/a.rev-1)*100).toFixed(1)}%</div></div>
+   <div class="kpi"><div class="k">식자재 · 인건비율</div><div class="v" style="font-size:20px">${b.food.toFixed(1)} · ${b.labor.toFixed(1)}<small>%</small></div><div class="d">${dlt(a.food,b.food,true,'p')} · ${dlt(a.labor,b.labor,true,'p')}</div></div>
+   <div class="kpi"><div class="k">QSC · 위생 B</div><div class="v" style="font-size:20px">${b.qsc.toFixed(1)} · ${b.b}<small>%</small></div><div class="d">QSC ${dlt(a.qsc,b.qsc,false,'')}</div></div>
+  </div>
+  <div class="legend" style="margin-bottom:6px"><span><i style="background:var(--accent)"></i>${S.store.split(' ')[1]}</span><span><i style="background:var(--ctx)"></i>9개 매장 평균</span></div>
+  <div class="chart" id="cStoreLine"></div>
+  <div class="ch" style="margin:16px 0 6px"><div><h3>관련 사건</h3></div></div>
+  <ul class="ev">${(EVENTS[S.store].length?EVENTS[S.store]:[['—','사건로그에 기록된 특이 사건 없음']]).map(e=>`<li><b>${e[0]}</b><span>${e[1]}</span></li>`).join('')}</ul>`;
+  const avg=YRS.map(y=>{let r=0,o=0;STORES.forEach(s=>{r+=DATA.stores[s][y].rev;o+=DATA.stores[s][y].op});return o/r*100});
+  lines('cStoreLine',YRS.map(String),[{n:'9개 매장 평균',v:avg,c:'#6c737f',end:false,dash:'4 4'},{n:S.store,v:YRS.map(y=>d[y].opm),c:COL.s2,area:.22,w:2}],{f:v=>(+v).toFixed(1)+'%',ticks:[10,12,14,16,18,20,22],H:220});
+}
+function rData(){
+  const box=document.getElementById('chYears');box.innerHTML='';
+  [2022,2023,2024,2025,2026].forEach(y=>{const b=document.createElement('button');b.className='chip'+(S.years.includes(y)?' on':'');b.textContent=y;b.onclick=()=>{S.years=S.years.includes(y)?S.years.filter(v=>v!==y):[...S.years,y].sort();rData()};box.appendChild(b)});
+  const col={2022:'#3b414a',2023:'#4f5661',2024:'#7a828e',2025:COL.s1,2026:COL.s2};
+  const ms=['01','02','03','04','05','06','07','08','09','10','11','12'];
+  const ser=S.years.map(y=>({n:String(y),v:ms.map(m=>{const r=DATA.monthly.find(x=>x.m===`${y}-${m}`);return r?r.food:null}),c:col[y],w:y===2026?2.4:1.5,area:y===2026?.18:0,end:y===2026||y===2025}));
+  if(!ser.length){const s=svg('cFood',900,60);txt(s,450,34,'연도를 하나 이상 선택하세요',{'text-anchor':'middle',class:'ko'});return}
+  lines('cFood',ms.map(m=>+m+'월'),ser,{W:900,H:280,f:v=>(+v).toFixed(1)+'%',ticks:[27,28,29,30,31,32,33,34,35]});
+}
+const INITS=[['labor','인력 생산성 관리','인건비율 29.0% → 27.7%',1.4],['coupon','쿠폰 타기팅','쿠폰 매출 대비 9.0% → 8.0%',1.1],['turn','하위 2개 매장 턴어라운드','충장로·연동 2025 이익률 회복',0.7],['app','자사앱 배달 전환','외부앱 배달 10% 이전',0.65]];
+function rAction(){
+  const box=document.getElementById('inits');box.innerHTML='';
+  INITS.forEach(([k,n,a,v])=>{const b=document.createElement('button');b.className='ini'+(S.inits[k]?' on':'');b.setAttribute('aria-pressed',S.inits[k]);b.innerHTML=`<span class="sw"></span><span><div class="nm">${n}</div><div class="as">${a}</div></span><span class="val">${v.toFixed(2).replace(/0$/,'')}<small style="font-size:12px;color:var(--ink-3)"> 억</small></span>`;b.onclick=()=>{S.inits[k]=!S.inits[k];rAction()};box.appendChild(b)});
+  const tot=INITS.reduce((t,[k,,,v])=>t+(S.inits[k]?v:0),0),pct=tot/18.4*100;
+  const W=340,H=340,cx=170,cy=170,R=118,s=svg('cGauge',W,H),d=el('defs',{},s);
+  const ag=el('linearGradient',{id:'garc',x1:0,y1:1,x2:1,y2:0},d);el('stop',{offset:'0%','stop-color':'#b48a3f'},ag);el('stop',{offset:'100%','stop-color':'#f3d08e'},ag);
+  const fl=el('filter',{id:'gneu',x:'-30%',y:'-30%',width:'160%',height:'160%'},d);el('feDropShadow',{dx:10,dy:10,stdDeviation:12,'flood-color':'#0e1013','flood-opacity':.9},fl);el('feDropShadow',{dx:-8,dy:-8,stdDeviation:10,'flood-color':'#2c3037','flood-opacity':.9},fl);
+  el('circle',{cx,cy,r:R+30,fill:'#1d2025',filter:'url(#gneu)'},s);
+  const a0=-225,span=270,ang=f=>(a0+f*span)*Math.PI/180,pt=(f,r)=>[cx+r*Math.cos(ang(f)),cy+r*Math.sin(ang(f))];
+  const arc=(f,r)=>{const [x0,y0]=pt(0,r),[x1,y1]=pt(f,r);return `M${x0},${y0} A${r},${r} 0 ${f*span>180?1:0} 1 ${x1},${y1}`};
+  el('path',{d:arc(1,R),fill:'none',stroke:'#14161a','stroke-width':12,'stroke-linecap':'round'},s);
+  const f=Math.min(pct/30,1);if(f>0)el('path',{d:arc(Math.max(f,.001),R),fill:'none',stroke:'url(#garc)','stroke-width':12,'stroke-linecap':'round'},s);
+  [0,10,20,30].forEach(v=>{const [x,y]=pt(v/30,R-24);txt(s,x,y+4,'+'+v+'%',{'text-anchor':'middle',style:'font-size:9.5px'})});
+  txt(s,cx,cy+2,`+${tot.toFixed(2).replace(/0$/,'')}억`,{'text-anchor':'middle',style:'font-size:40px;font-weight:300;fill:#eceef1'});
+  txt(s,cx,cy+28,`영업이익 +${pct.toFixed(0)}%`,{'text-anchor':'middle',class:'ko',style:'font-size:13px;fill:#e2b866;font-family:Noto Sans KR,sans-serif'});
+  txt(s,cx,cy+50,`18.4억 → ${(18.4+tot).toFixed(1)}억`,{'text-anchor':'middle',class:'ko',style:'font-size:11.5px;font-family:Noto Sans KR,sans-serif'});
+  document.getElementById('gaugeTxt').textContent='게이지 끝 = 영업이익 +30%. 데이터·KPI 정비는 직접 효과는 없지만 모든 과제를 측정하는 전제입니다.';
+}
+function render(p){({home:rHome,growth:rGrowth,cost:rCost,channel:rChannel,stores:rStores,data:rData,action:rAction}[p])()}
+
+/* ---------- wiring ---------- */
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+document.getElementById('btnHome').onclick=()=>go('home');
+document.getElementById('btnReset').onclick=()=>{S=JSON.parse(JSON.stringify(DEF));go('home')};
+document.querySelectorAll('#chRange .chip').forEach(c=>c.onclick=()=>{S.range=c.dataset.v;rGrowth()});
+document.querySelectorAll('#chMetric .chip').forEach(c=>c.onclick=()=>{S.metric=c.dataset.v;rStores()});
+go('home');
+</script>
+</body>
+</html>

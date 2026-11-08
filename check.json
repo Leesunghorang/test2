@@ -1,0 +1,254 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "filesScanned": 10
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 1,
+    "findings": [
+      {
+        "code": "canvas_content_at_edge",
+        "severity": "warning",
+        "time": 1.667,
+        "selector": "#paint-canvas",
+        "message": "Canvas content touches the frame edge (right).",
+        "rect": {
+          "left": -0.44,
+          "top": -0.27,
+          "right": 1920.33,
+          "bottom": 1080.16,
+          "width": 1920.77,
+          "height": 1080.43
+        },
+        "containerSelector": "#root",
+        "fixHint": "Keep drawn text inside the visible part of the canvas, or mark intentional full-bleed art with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "dataAttributes": {
+          "data-hf-id": "hf-fump"
+        },
+        "sourceFile": "compositions/painting.html",
+        "bbox": {
+          "x": -0.44,
+          "y": -0.27,
+          "width": 1920.77,
+          "height": 1080.43
+        },
+        "firstSeen": 1.667,
+        "lastSeen": 28.333,
+        "occurrences": 5,
+        "heldMs": 0,
+        "times": [
+          1.667,
+          5,
+          11.667,
+          15,
+          28.333
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 5,
+        "selector": "#paint-cam",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -3.74,
+          "top": -2.21,
+          "right": 1922.59,
+          "bottom": 1081.35,
+          "width": 1926.34,
+          "height": 1083.56
+        },
+        "containerSelector": "#painting > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 3.74,
+          "right": 2.59,
+          "top": 2.21
+        },
+        "dataAttributes": {
+          "data-hf-id": "hf-ioad"
+        },
+        "sourceFile": "compositions/painting.html",
+        "bbox": {
+          "x": -3.74,
+          "y": -2.21,
+          "width": 1926.34,
+          "height": 1083.56
+        },
+        "firstSeen": 5,
+        "lastSeen": 25,
+        "occurrences": 7,
+        "heldMs": 0,
+        "times": [
+          5,
+          8.333,
+          11.667,
+          15,
+          18.333,
+          21.667,
+          25
+        ]
+      }
+    ],
+    "duration": 30,
+    "samples": [
+      1.667,
+      5,
+      8.333,
+      11.667,
+      15,
+      18.333,
+      21.667,
+      25,
+      28.333
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 2,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.53:1; WCAG AA requires 3:1.",
+        "text": "−3.7%",
+        "fg": "rgb(120,35,220)",
+        "bg": "rgb(158,154,183)",
+        "ratio": 2.53,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(105,31,193)",
+        "large": true,
+        "selector": "#s5-r2n",
+        "dataAttributes": {},
+        "sourceFile": "compositions/s5.html",
+        "bbox": {
+          "x": 810,
+          "y": 498,
+          "width": 300.359375,
+          "height": 104
+        },
+        "time": 21.667,
+        "times": [
+          21.667
+        ]
+      }
+    ],
+    "enabled": true,
+    "samples": [
+      1.667,
+      8.333,
+      15,
+      21.667,
+      28.333
+    ],
+    "checked": 26,
+    "passed": 25
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"설명되지 않는 손익 5%\" (4 words) is on screen 1.09 s (±0.01 s), under its 1.27 s floor: hold it about 0.5 s + 0.3 s a word (1.70 s here) before it leaves or changes; see references/motion.md.",
+        "text": "설명되지 않는 손익 5%",
+        "selector": "#s5-l3",
+        "dataAttributes": {},
+        "sourceFile": "compositions/s5.html",
+        "bbox": {
+          "x": 228,
+          "y": 680,
+          "width": 609.27,
+          "height": 92
+        },
+        "time": 23.008,
+        "words": 4,
+        "seconds": 1.094,
+        "floorSeconds": 1.275
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 240
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  },
+  "saved": {
+    "id": "6f9f99fc-ad60-4c25-b668-0ec95154d349",
+    "revision": "67f757d0-d68f-46b3-8b92-082fd0e60ab1",
+    "report": "C:\\Users\\user\\Desktop\\excel_raw\\winter-film\\.hyperframes\\artifacts\\checks\\6f9f99fc-ad60-4c25-b668-0ec95154d349.json",
+    "attribution": "recorded-revision"
+  },
+  "_meta": {
+    "version": "0.8.222",
+    "latestVersion": "0.9.22",
+    "updateAvailable": true
+  }
+}

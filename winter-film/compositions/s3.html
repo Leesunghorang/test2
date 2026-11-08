@@ -1,0 +1,77 @@
+<template>
+  <style>
+@font-face { font-family: 'Black Han Sans'; src: url('assets/fonts/BlackHanSans-sub.ttf') format('truetype'); }
+@font-face { font-family: 'Noto Sans KR'; src: url('assets/fonts/NotoSansKR-sub.ttf') format('truetype'); font-weight: 100 900; }
+#root { position: absolute; inset: 0; font-family: 'Noto Sans KR', sans-serif; color: #1d1a24; }
+.stage { position: absolute; inset: 0; }
+.swipe { position: absolute; background-color: #f4f2f7;
+  background-image: repeating-linear-gradient(177deg, rgba(120,110,145,0.10) 0 2px, rgba(255,255,255,0) 2px 8px);
+  border-radius: 22px 64px 26px 72px / 34px 18px 44px 16px; box-shadow: 4px 7px 0 rgba(55,45,85,0.20); }
+.swipe.purple { background-color: #7823DC;
+  background-image: repeating-linear-gradient(177deg, rgba(255,255,255,0.10) 0 2px, rgba(0,0,0,0) 2px 9px), repeating-linear-gradient(3deg, rgba(40,0,90,0.18) 0 3px, rgba(0,0,0,0) 3px 13px); }
+.cap { position: absolute; top: -26px; height: 44px; background: #fbfafd; border-radius: 50% 46% 30% 40% / 100% 100% 22% 22%;
+  box-shadow: inset 0 -9px 8px rgba(150,140,190,0.50), 0 3px 0 rgba(90,75,140,0.25); }
+.t { position: absolute; white-space: nowrap; line-height: 1.15; text-shadow: 2px 3px 0 rgba(40,30,70,0.16); }
+.disp { font-family: 'Black Han Sans', sans-serif; line-height: 1; letter-spacing: -0.005em; }
+.acc { color: #7823DC; text-shadow: 3px 4px 0 rgba(60,20,110,0.22), -1px -1px 0 rgba(255,255,255,0.35); }
+.sub { color: #3d3750; font-weight: 600; }
+.w { display: inline-block; }
+</style>
+  <div id="root" data-composition-id="s3" data-width="1920" data-height="1080">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="s3-knife" x="-6%" y="-30%" width="112%" height="160%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.010 0.06" numOctaves="3" seed="4" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G" result="d"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.22" numOctaves="2" seed="11" result="n2"/>
+    <feDiffuseLighting in="n2" lighting-color="#ffffff" surfaceScale="2.6" result="l"><feDistantLight azimuth="235" elevation="58"/></feDiffuseLighting>
+    <feComposite in="l" in2="d" operator="in" result="lc"/>
+    <feBlend in="d" in2="lc" mode="multiply"/>
+  </filter>
+  <filter id="s3-ink" x="-3%" y="-10%" width="106%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+    <div class="stage" id="s3-stage">
+
+      <div class="t" id="s3-l1" style="left:200px;top:190px;font-size:80px;font-weight:800"><span class="w ">인건비율</span></div>
+      <div class="t sub" id="s3-l1s" style="left:206px;top:298px;font-size:38px">매출 대비 인건비 · 2020 → 2025</div>
+      <div class="t disp acc" id="s3-n" style="left:196px;top:380px;font-size:300px;filter:url(#s3-ink)">24.5%</div>
+      <svg id="s3-arrow" width="640" height="420" viewBox="0 0 640 420" style="position:absolute;left:1140px;top:300px;overflow:visible;filter:url(#s3-knife)">
+        <path id="s3-arrowline" d="M 20 390 C 180 360, 330 260, 560 60" fill="none" stroke="#7823DC" stroke-width="30" stroke-linecap="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
+        <path id="s3-arrowhead" d="M 470 52 L 585 38 L 552 150" fill="none" stroke="#7823DC" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+      </svg>
+      <div class="swipe" id="s3-sw1" style="left:190px;top:742px;width:900px;height:96px;filter:url(#s3-knife)"><div class="cap" id="s3-cap1" style="left:45px;width:774px"></div></div>
+      <div class="t" id="s3-l2" style="left:228px;top:752px;font-size:54px;font-weight:700"><span class="w ">이익을</span> <span class="w ">가장</span> <span class="w ">크게</span> <span class="w ">깎은</span> <span class="w ">비용</span></div>
+
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      
+const wipe = (sel, at) => tl.fromTo(sel, { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.45, ease: 'power3.out' }, at);
+const capGrow = (sel, at, dur) => tl.fromTo(sel, { scaleY: 0.05, transformOrigin: '50% 100%' }, { scaleY: 1, duration: dur, ease: 'power1.out' }, at);
+const wordsIn = (sel, at, gap) => tl.fromTo(sel, { opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out', stagger: gap || 0.08 }, at);
+const inkIn = (sel, at) => tl.fromTo(sel, { color: '#b9b3c8' }, { color: '#1d1a24', duration: 0.35, ease: 'power2.out', stagger: 0.09 }, at);
+const lineIn = (sel, at) => tl.fromTo(sel, { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.2, ease: 'power3.out' }, at);
+const count = (sel, at, a, b, dur, fmt) => { const o = { v: a }; const el = document.querySelector(sel);
+  el.textContent = fmt(a);
+  tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: 0.12 }, at);
+  tl.fromTo(o, { v: a }, { v: b, duration: dur, ease: 'power2.out', onUpdate: () => { el.textContent = fmt(o.v); } }, at); };
+const sgn = (v, d) => (v < 0 ? '−' : '+') + Math.abs(v).toFixed(d);
+
+      
+      wordsIn('#s3-l1 .w', 0.1); lineIn('#s3-l1s', 0.4);
+      count('#s3-n', 0.6, 24.5, 29.0, 1.5, v => v.toFixed(1) + '%');
+      tl.fromTo('#s3-arrowline', { attr: { 'stroke-dashoffset': 110 } }, { attr: { 'stroke-dashoffset': 0 }, duration: 1.4, ease: 'power2.inOut' }, 0.7);
+      tl.fromTo('#s3-arrowhead', { opacity: 0 }, { opacity: 1, duration: 0.15 }, 2.0);
+      wipe('#s3-sw1', 2.5); capGrow('#s3-cap1', 2.65, 2.20);
+      wordsIn('#s3-l2 .w', 2.7, 0.09);
+
+      tl.to('#s3-stage', { opacity: 0, filter: 'blur(8px)', duration: 0.22, ease: 'power3.in' }, 4.70);
+      tl.set({}, {}, 5.0);
+      window.__timelines['s3'] = tl;
+    })();
+  </script>
+</template>

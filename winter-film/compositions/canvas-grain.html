@@ -1,0 +1,32 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; }
+    #grain-canvas { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; mix-blend-mode: multiply; opacity: 0.16; }
+    #grain-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse 75% 70% at 50% 45%, rgba(40,30,60,0) 60%, rgba(40,30,60,0.22) 100%); }
+  </style>
+  <div data-hf-id="hf-00lg" id="root" data-composition-id="grain" data-width="1920" data-height="1080" data-no-timeline data-layout-ignore>
+    <canvas data-hf-id="hf-9kp4" id="grain-canvas" width="1920" height="1080"></canvas>
+    <div data-hf-id="hf-tes5" id="grain-vignette"></div>
+  </div>
+  <script>
+    (function () {
+      const ctx = document.getElementById('grain-canvas').getContext('2d');
+      let a = 77;
+      const rnd = () => { a = (a * 1664525 + 1013904223) >>> 0; return a / 4294967296; };
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 1920, 1080);
+      // linen weave: alternating warp and weft threads
+      for (let y = 0; y < 1080; y += 3) {
+        ctx.fillStyle = `rgba(90,80,110,${0.10 + rnd() * 0.12})`;
+        ctx.fillRect(0, y, 1920, 1);
+      }
+      for (let x = 0; x < 1920; x += 3) {
+        ctx.fillStyle = `rgba(90,80,110,${0.08 + rnd() * 0.12})`;
+        ctx.fillRect(x, 0, 1, 1080);
+      }
+      for (let i = 0; i < 9000; i++) {
+        ctx.fillStyle = `rgba(70,60,90,${rnd() * 0.25})`;
+        ctx.fillRect(rnd() * 1920, rnd() * 1080, 1 + rnd() * 2, 1);
+      }
+    })();
+  </script>
+</template>
