@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>피자 9개 매장 성과 진단</title>
+<style>
+  :root { --bg:#fbfbfa; --ink:#14161a; --ink2:#4a4d55; --rule:#e2e3e6; --accent:#7823DC; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#141518; --ink:#eceef1; --ink2:#b9bdc6; --rule:#2e3138; --accent:#a77bf0; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; line-height:1.7; word-break:keep-all; }
+  main { max-width:960px; margin:0 auto; padding:40px 16px 80px; display:grid; gap:36px; }
+  h1 { margin:0; font-size:clamp(26px,4vw,34px); }
+  h2 { margin:0 0 10px; font-size:20px; }
+  p { margin:0; color:var(--ink2); }
+  video { width:100%; border-radius:6px; border:1px solid var(--rule); background:#000; }
+  ul { margin:0; padding-left:20px; display:grid; gap:6px; }
+  a { color:var(--accent); font-weight:600; }
+  header { border-bottom:2px solid var(--ink); padding-bottom:18px; display:grid; gap:8px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>피자 9개 매장 성과 진단</h1>
+    <p>2020-01 ~ 2026-08 매장별 실적 탐색적 데이터 분석과 결과물 모음입니다. 실습용 가상 데이터입니다.</p>
+  </header>
+  <section>
+    <h2>30초 요약 영상</h2>
+    <video src="winter-film/renders/winter-insights.mp4" controls preload="metadata" playsinline></video>
+  </section>
+  <section>
+    <h2>결과물</h2>
+    <ul>
+      <li><a href="pizza_eda_report.html">EDA 리포트</a>: 이슈 트리, 시사점 5개와 근거 차트, 사건로그 검증, 개선 효과, 90일 실행 계획</li>
+      <li><a href="winter-film/renders/winter-insights.mp4">영상 파일(MP4)</a></li>
+      <li><a href="https://github.com/noxnnyx/excel_raw">소스 저장소</a></li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
